@@ -1,6 +1,5 @@
 package com.at.wechair.entity;
 
-import javafx.scene.chart.PieChart;
 import lombok.*;
 
 import java.util.Date;
