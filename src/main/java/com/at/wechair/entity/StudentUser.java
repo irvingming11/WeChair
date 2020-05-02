@@ -40,6 +40,15 @@ public class StudentUser {
 
     public void studentCertificate(String name, String sex, String studentNumber, String dept, String specialty) {
 
+        /*
+           判断学生信息是否属实,属实则修改数据库中的认证状态
+          if(){
+              alterCertificationStatus();
+
+          }
+
+         */
+
     }
     // 修改学时排行状态
 
