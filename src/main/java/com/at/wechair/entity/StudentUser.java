@@ -1,6 +1,7 @@
 package com.at.wechair.entity;
 
 import lombok.*;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Date;
 
@@ -12,16 +13,21 @@ import java.util.Date;
  * @Time: 15:22
  * @Description
  */
-
+/*
+    @Validated  标注进行数据校验，可以对学号等信息进行数据校验
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Validated
 
 public class StudentUser {
     private String name;
     private String sex;
+    // 自定义一个@Student注解来对学号进行校验
+
     private String studentNumber;
     private String dept;
     private String specialty;
