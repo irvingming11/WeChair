@@ -25,6 +25,7 @@ public class MessageNotifyingController {
      * headers： 指定request中必须包含某些指定的header值，才能让该方法处理请求
      */
     // 进入消息通知页面
+
     @RequestMapping(value = "/messages")
     public String messages() {
         OrdinaryUser user = new OrdinaryUser();

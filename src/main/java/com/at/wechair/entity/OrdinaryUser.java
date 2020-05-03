@@ -15,7 +15,7 @@ import lombok.*;
 
 
 /*
- *  @Data                    Lombok注解自动生成Getter 和 Setter方法
+ * @Data                    Lombok注解自动生成Getter 和 Setter方法
  * @NoArgsConstructor       无参构造器
  * @AllArgsConstructor      全参构造器
  * @EqualsAndHashCode       equals 和 hashcode方法
