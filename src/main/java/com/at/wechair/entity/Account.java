@@ -21,9 +21,12 @@ public class Account {
     /**
      * certificationStatus     学生认证状态
      * blackListStatus         账户黑名单状态
+     * ownAuthority            拥有的权限
      */
     private boolean certificationStatus;
     private boolean blackListStatus;
+    private String openId;
+    private static String ownAuthority = "ORDINARY_AUTHORITY";
     public void showUserRule(boolean certificationStatus){
     }
     public void showUserRule(){

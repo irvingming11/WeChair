@@ -1,4 +1,4 @@
-package com.at.wechair.mapper.dao;
+package com.at.wechair.mapper;
 
 import java.util.HashMap;
 
