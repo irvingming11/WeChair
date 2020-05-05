@@ -1,25 +1,25 @@
 package com.at.wechair.controller;
 
-import com.at.wechair.entity.AesCbcUtil;
 import com.at.wechair.entity.HttpRequest;
+import com.at.wechair.service.LoginService;
 import com.mysql.cj.util.StringUtils;
-import org.bouncycastle.jcajce.provider.symmetric.AES;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidParameterSpecException;
@@ -47,6 +47,9 @@ public class LoginController {
 
     private static final String APP_ID = "wxc5e747c5efae300d";
     private static final String GRANT_TYPE="authorization_code";
+
+    @Resource
+    private LoginService loginService;
     /**
      * 用户登录小程序通过微信接口获取用户信息
      *
@@ -62,17 +65,12 @@ public class LoginController {
                                              @RequestParam(value = "code")String code) throws JSONException {
 
         Map<String, Object> map = new HashMap<>(1000);
-
         // 登录凭证不能为空
         if (StringUtils.isNullOrEmpty(code)) {
             map.put("status", 0);
             map.put("msg", "code 不能为空");
             return map;
         }
-
-
-
-
         // 向微信服务器 使用登录凭证 code 获取 session_key 和 openid
 
         // 请求参数
@@ -85,12 +83,12 @@ public class LoginController {
         // 获取会话密钥（session_key）
         String sessionKey = json.get("session_key").toString();
         String openid = json.get("openid").toString();
-        json.put("openid", openid);
-        json.put("session_key", sessionKey);
+        map.put("openid", openid);
+        map.put("session_key", sessionKey);
         if (json.has("unionid")) {
-            json.put("unionid", json.get("unionid"));
+            map.put("unionid", json.get("unionid"));
         }else{
-            json.put("unionid", "");
+            map.put("unionid", "");
         }
 
 
@@ -140,7 +138,6 @@ public class LoginController {
                 System.arraycopy(keyByte, 0, temp, 0, keyByte.length);
                 keyByte = temp;
             }
-            // 初始化
             Security.addProvider(new BouncyCastleProvider());
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding","BC");
             SecretKeySpec spec = new SecretKeySpec(keyByte, "AES");
