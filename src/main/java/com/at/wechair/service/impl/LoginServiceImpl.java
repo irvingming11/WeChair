@@ -18,8 +18,7 @@ import javax.annotation.Resource;
 
 @Service
 public class LoginServiceImpl implements LoginService {
-    @Resource
-    private LoginDao loginDao;
+
     @Override
     public boolean getUserAuthorities(Account account) {
 
