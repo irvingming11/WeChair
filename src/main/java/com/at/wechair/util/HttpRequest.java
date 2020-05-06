@@ -1,6 +1,4 @@
-package com.at.wechair.entity;
-
-import org.json.JSONObject;
+package com.at.wechair.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +21,6 @@ public class HttpRequest {
     public static void main(String[] args) {
         //发送 GET 请求
         String s = HttpRequest.sendGet("", "");
-        System.out.println(s);
 
         //发送 POST 请求
         String str = HttpRequest.sendPost("http://www.toutiao.com/stream/widget/local_weather/data/?city=%E4%B8%8A%E6%B5%B7", "");
@@ -54,11 +51,12 @@ public class HttpRequest {
             // 建立实际的连接
             connection.connect();
             // 获取所有响应头字段
-            Map<String, List<String>> map = connection.getHeaderFields();
-            // 遍历所有的响应头字段
-            for (String key : map.keySet()) {
-                System.out.println(key + "--->" + map.get(key));
-            }
+//            Map<String, List<String>> map = connection.getHeaderFields();
+//            // 遍历所有的响应头字段
+//            for (String key : map.keySet()) {
+//                System.out.println(key + "--->" + map.get(key));
+//            }
+
             // 定义 BufferedReader输入流来读取URL的响应
             in = new BufferedReader(new InputStreamReader(
                     connection.getInputStream()));
