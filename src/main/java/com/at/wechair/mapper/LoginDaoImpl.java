@@ -1,7 +1,5 @@
 package com.at.wechair.mapper;
 
-import com.at.wechair.entity.Account;
-import com.at.wechair.entity.OrdinaryUser;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -16,36 +14,41 @@ import java.util.HashMap;
  * @Time: 15:45
  * @Description
  */
+
 @Repository
 public class LoginDaoImpl extends BaseDao implements LoginDao{
+    private int operatedResult = 0;
+
+
     @Override
-    public boolean add(Account account, OrdinaryUser user) {
-        int i = 0;
+    public boolean dataOperation(String sql,Object[] params) {
         try{
-            String sql = "insert into Student(UserID,Gender,Nickname,Password,warrant) values(?,?,?,?,?)";
-            Object[] params = {account.getOpenId(),user.getSex(),user.getWeChatName(),account.getSessionKey(),account.getOwnAuthority()};
-            i  = super.executeUpdate(sql,params);
+            operatedResult  = super.executeUpdate(sql,params);
         }catch (Exception e){
             e.printStackTrace();
         }finally{
             super.closeResource();
         }
-        return i > 0;
+        return operatedResult > 0;
     }
 
+
+
     @Override
-    public void getList(HashMap<Object,Object> map) {
+    public String getUserInfo(HashMap<String,Object> map) {
         String sql = "select * from Student where UserID = ?";
+        System.out.println("执行");
         Object[] params = {map.get("open_id")};
         ResultSet rs = super.executeQuery(sql,params);
+        String result = null;
         try {
-            // 未写完整
-            rs.getString(1);
+            result = rs.getString("UserID");
         } catch (SQLException e) {
             e.printStackTrace();
         }finally{
             super.closeResource();
         }
+        return result;
     }
 
 }

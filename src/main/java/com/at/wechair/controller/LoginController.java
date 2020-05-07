@@ -61,7 +61,7 @@ public class LoginController {
                                               @RequestParam(value = "code") String code) throws Exception {
 
 
-        Map<String, Object> map = new HashMap<>(1000);
+        HashMap<String, Object> map = new HashMap<>(1000);
         // 登录凭证不能为空
         if (StringUtils.isNullOrEmpty(code)) {
             map.put("status", 0);
@@ -75,11 +75,16 @@ public class LoginController {
 //        获取sessionKey和openId
         map = getMap(params, map);
         String sessionKey = (String) map.get("session_key");
-        //对encryptedData加密数据进行AES解密
         String string = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
         JSONObject result = new JSONObject(string);
         map = getMap(result, map);
-        dealWithInfo(map);
+        if(loginService.findOneUser(map)){
+            dealWithInfo(map.get("open_id"),sessionKey,map.get("nickName"));
+        }else {
+
+            //对encryptedData加密数据进行AES解密
+            dealWithInfo(map);
+        }
         return map;
     }
 
@@ -91,7 +96,7 @@ public class LoginController {
      * @return map
      * @throws JSONException JSON对象异常
      */
-    public Map<String, Object> getMap(String params, Map<String, Object> map) throws JSONException {
+    public HashMap<String, Object> getMap(String params, HashMap<String, Object> map) throws JSONException {
         // 发送请求
         String str = HttpRequest.sendGet("https://api.weixin.qq.com/sns/jscode2session", params);
         // 解析相应内容（转换成json对象）
@@ -117,7 +122,7 @@ public class LoginController {
      * @return map
      * @throws JSONException JSON对象异常
      */
-    public Map<String, Object> getMap(JSONObject result, Map<String, Object> map) throws JSONException {
+    public HashMap<String, Object> getMap(JSONObject result, HashMap<String, Object> map) throws JSONException {
         if (result != null && result.length() > 0) {
             map.put("status", 1);
             map.put("msg", "解密成功");
@@ -127,6 +132,7 @@ public class LoginController {
             map.put("province", result.get("province"));
             map.put("country", result.get("country"));
             map.put("avatarUrl", result.get("avatarUrl"));
+
         } else {
             map.put("status", 0);
             map.put("msg", "解密失败");
@@ -134,6 +140,10 @@ public class LoginController {
         return map;
     }
 
+    /**
+     * 首次登陆用户解密的用户信息插入数据库
+     * @param map   存储数据的map容器
+     */
     public void dealWithInfo(Map<String, Object> map) {
         Account account = new Account();
         OrdinaryUser user = new OrdinaryUser();
@@ -155,6 +165,13 @@ public class LoginController {
             System.out.println("数据存储成功");
         } else {
             System.out.println("数据存储失败");
+        }
+    }
+    public void dealWithInfo(Object openId, String sessionKey, Object userName){
+        if(loginService.updateUserInfo(openId.toString(), sessionKey,userName.toString())){
+            System.out.println("数据库更新成功");
+        }else{
+            System.out.println("数据库更新失败");
         }
     }
 }
