@@ -1,5 +1,8 @@
 package com.at.wechair.mapper;
 
+import com.at.wechair.entity.Account;
+import com.at.wechair.entity.OrdinaryUser;
+
 import java.util.HashMap;
 
 /**
@@ -13,9 +16,11 @@ import java.util.HashMap;
 public interface LoginDao {
     /**
      * 添加操作
-     * @return boolean
+     * @param account 账户
+     * @param user  用户
+     * @return  boolean
      */
-    boolean add();
+    boolean add(Account account, OrdinaryUser user);
 
     /**
      * 获取数据操作
