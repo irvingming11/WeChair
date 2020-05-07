@@ -2,7 +2,6 @@ package com.at.wechair.util;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.json.JSONObject;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -13,7 +12,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import java.io.UnsupportedEncodingException;
 import java.security.*;
-import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.Arrays;
 

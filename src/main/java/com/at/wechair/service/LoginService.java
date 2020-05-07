@@ -1,7 +1,7 @@
 package com.at.wechair.service;
 
 import com.at.wechair.entity.Account;
-import org.springframework.stereotype.Service;
+import com.at.wechair.entity.OrdinaryUser;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,6 +20,14 @@ public interface LoginService {
      * @param account  账户类
      * @return boolean
      */
-    boolean getUserAuthorities(Account account);
+    String getUserAuthorities(Account account);
+
+    /**
+     * 存储用户信息
+     * @param account   账户
+     * @param user      用户
+     * @return boolean
+     */
+    boolean storageUserInfo(Account account, OrdinaryUser user);
 
 }

@@ -27,9 +27,10 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 
-public class OrdinaryUser {
+public class OrdinaryUser{
     public String  userName;
     public String weChatName;
+    private String sex;
     private String phoneNumber;
     //无效离座次数
 

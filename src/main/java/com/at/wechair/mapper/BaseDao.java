@@ -23,9 +23,9 @@ public class BaseDao {
 
     public boolean getConnection(){
         String driver="com.mysql.jdbc.Driver";
-        String url="jdbc:mysql://175.24.82.144:3306/wechair";
-        String username="root";
-        String password="#annoming@2660202";
+        String url="jdbc:mysql://175.24.82.144:3306/wechair?useUnicode=true&characterEncoding=utf-8";
+        String username="jiecheng";
+        String password="jiecheng1234";
         try {
             Class.forName(driver);
             cnt= DriverManager.getConnection(url,username,password);

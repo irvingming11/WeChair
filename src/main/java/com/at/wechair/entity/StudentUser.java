@@ -19,19 +19,23 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @ToString
 @Validated
 
-public class StudentUser {
+public class StudentUser extends OrdinaryUser{
     private String name;
-    private String sex;
+
     // 自定义一个@Student注解来对学号进行校验
 
     private String studentNumber;
     private String dept;
     private String specialty;
+    //预约剩余时间
+
     private Date outTime;
+//    学习时长
+
     private Double studyTime;
     //抢座的等待时长
 
