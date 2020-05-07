@@ -15,16 +15,19 @@ import java.util.HashMap;
  */
 public interface LoginDao {
     /**
-     * 添加操作
-     * @param account 账户
-     * @param user  用户
+     * 数据增删改操作
+     * @param sql 操作的sql语句
+     * @param params 操作的对象
      * @return  boolean
      */
-    boolean add(Account account, OrdinaryUser user);
+    boolean dataOperation(String sql,Object[] params);
+
+
 
     /**
      * 获取数据操作
      * @param map json数据
+     * @return String
      */
-    void getList(HashMap<Object,Object> map);
+    String getUserInfo(HashMap<String,Object> map);
 }
