@@ -1,9 +1,6 @@
 package com.at.wechair.controller;
 
-import com.at.wechair.entity.Account;
-import com.at.wechair.entity.OrdinaryUser;
 import com.at.wechair.service.LoginService;
-import com.at.wechair.util.AesCbcUtil;
 import com.at.wechair.util.HttpRequest;
 
 
