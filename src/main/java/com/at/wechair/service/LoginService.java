@@ -2,6 +2,7 @@ package com.at.wechair.service;
 
 import com.at.wechair.entity.Account;
 import com.at.wechair.entity.OrdinaryUser;
+import org.json.JSONException;
 
 import java.util.HashMap;
 
@@ -29,6 +30,21 @@ public interface LoginService {
      * @return boolean
      */
     String getUserAuthorities(Account account);
+
+    /**
+     * 解密用户信息
+     *
+     *
+     *
+     *
+     * @param encryptedData     用户的加密数据
+     * @param sessionKey        用户的session_key
+     * @param iv                用户的密钥
+     * @param map               存储信息的map容器
+     * @return  HashMap
+     * @throws JSONException    json数据异常
+     */
+    HashMap<String,Object> decryptUserInfo(String encryptedData,String sessionKey,String iv,HashMap<String,Object> map) throws JSONException;
 
     /**
      * 存储用户信息

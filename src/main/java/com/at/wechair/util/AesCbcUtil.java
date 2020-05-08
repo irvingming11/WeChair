@@ -14,7 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.Arrays;
-
+import java.util.HashMap;
 
 
 /**
@@ -36,7 +36,7 @@ public class AesCbcUtil {
      * @param encodingFormat 解密后的结果需要进行的编码
      * @return   String
      * */
-    public static String decrypt(String encryptedData,String sessionKey,String iv, String encodingFormat) {
+    public static String decrypt(String encryptedData, String sessionKey, String iv, String encodingFormat) {
         // 加密数据
         byte[] dataByte = Base64.decodeBase64(encryptedData);
         // 加密秘钥
@@ -75,9 +75,8 @@ public class AesCbcUtil {
             cipher.init(Cipher.DECRYPT_MODE,keySpec,generateIv(iv));
             return cipher.doFinal(encryptedData);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchProviderException e) {
-            System.out.println("出了点小差错，请重新登录");
+            return null;
         }
-        return null;
     }
     private static AlgorithmParameters generateIv(byte[] iv){
         try {
