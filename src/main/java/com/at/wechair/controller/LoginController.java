@@ -30,6 +30,8 @@ import java.util.Map;
  * @Description
  */
 
+
+
 @RestController
 @RequestMapping(value = "LoginController")
 public class LoginController {
@@ -40,8 +42,6 @@ public class LoginController {
 
     private static final String APP_ID = "wxc5e747c5efae300d";
     private static final String GRANT_TYPE = "authorization_code";
-    private static final String MAN = "1";
-    private static final String WOMAN = "0";
     @Resource
     private LoginService loginService;
 
@@ -75,17 +75,7 @@ public class LoginController {
 //        获取sessionKey和openId
         map = getMap(params, map);
         String sessionKey = (String) map.get("session_key");
-        String string = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
-        JSONObject result = new JSONObject(string);
-        map = getMap(result, map);
-        if(loginService.findOneUser(map)){
-            dealWithInfo(map.get("open_id"),sessionKey,map.get("nickName"));
-        }else {
-
-            //对encryptedData加密数据进行AES解密
-            dealWithInfo(map);
-        }
-        return map;
+        return loginService.decryptUserInfo(encryptedData, sessionKey, iv, map);
     }
 
     /**
@@ -114,66 +104,6 @@ public class LoginController {
         return map;
     }
 
-    /**
-     * 存储解密数据
-     *
-     * @param result 解密结果
-     * @param map    存储解密数据对象
-     * @return map
-     * @throws JSONException JSON对象异常
-     */
-    public HashMap<String, Object> getMap(JSONObject result, HashMap<String, Object> map) throws JSONException {
-        if (result != null && result.length() > 0) {
-            map.put("status", 1);
-            map.put("msg", "解密成功");
-            map.put("nickName", result.get("nickName"));
-            map.put("gender", result.get("gender"));
-            map.put("city", result.get("city"));
-            map.put("province", result.get("province"));
-            map.put("country", result.get("country"));
-            map.put("avatarUrl", result.get("avatarUrl"));
-
-        } else {
-            map.put("status", 0);
-            map.put("msg", "解密失败");
-        }
-        return map;
-    }
-
-    /**
-     * 首次登陆用户解密的用户信息插入数据库
-     * @param map   存储数据的map容器
-     */
-    public void dealWithInfo(Map<String, Object> map) {
-        Account account = new Account();
-        OrdinaryUser user = new OrdinaryUser();
-        account.setOpenId((String) map.get("open_id"));
-        account.setSessionKey((String) map.get("session_key"));
-        user.setUserName((String) map.get("nickName"));
-        user.setWeChatName((String) map.get("nickName"));
-        String gender = map.get("gender").toString();
-        if (MAN.equals(gender)) {
-            user.setSex("男");
-        } else if (WOMAN.equals(gender)) {
-            user.setSex("女");
-        } else {
-
-            System.out.println("性别信息获取异常");
-        }
-        boolean result = loginService.storageUserInfo(account, user);
-        if (result) {
-            System.out.println("数据存储成功");
-        } else {
-            System.out.println("数据存储失败");
-        }
-    }
-    public void dealWithInfo(Object openId, String sessionKey, Object userName){
-        if(loginService.updateUserInfo(openId.toString(), sessionKey,userName.toString())){
-            System.out.println("数据库更新成功");
-        }else{
-            System.out.println("数据库更新失败");
-        }
-    }
 }
 
 
