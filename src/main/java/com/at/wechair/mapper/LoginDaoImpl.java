@@ -37,18 +37,23 @@ public class LoginDaoImpl extends BaseDao implements LoginDao{
     @Override
     public String getUserInfo(HashMap<String,Object> map) {
         String sql = "select * from Student where UserID = ?";
-        System.out.println("执行");
         Object[] params = {map.get("open_id")};
         ResultSet rs = super.executeQuery(sql,params);
-        String result = null;
-        try {
-            result = rs.getString("UserID");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally{
-            super.closeResource();
+        if(rs == null){
+            return null;
+        }else {
+            String result = null;
+            try {
+                while(rs.next()) {
+                    result = rs.getString("UserID");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                super.closeResource();
+            }
+            return result;
         }
-        return result;
     }
 
 }

@@ -75,7 +75,7 @@ public class AesCbcUtil {
             cipher.init(Cipher.DECRYPT_MODE,keySpec,generateIv(iv));
             return cipher.doFinal(encryptedData);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchProviderException e) {
-            e.printStackTrace();
+            System.out.println("出了点小差错，请重新登录");
         }
         return null;
     }

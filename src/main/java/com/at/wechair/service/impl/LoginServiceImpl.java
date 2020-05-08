@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -39,6 +40,9 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public boolean findOneUser(HashMap<String,Object> map) {
         String userId = loginDao.getUserInfo(map);
+        if(userId == null){
+            return false;
+        }
         return userId.equals(map.get(OPEN_ID));
     }
 
@@ -55,7 +59,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public boolean updateUserInfo(String openId, String sessionKey,String userName) {
-        Object[] params = {openId,sessionKey,userName};
+        Object[] params = {sessionKey,userName,openId};
         return loginDao.dataOperation(updateSql,params);
 
     }
