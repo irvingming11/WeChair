@@ -99,7 +99,6 @@ public class BaseDao {
                 for(int i=0;i<params.length;i++){
                     ps.setObject(i+1,params[i] );
                 }
-                System.out.println("执行");
                 // 对数据库执行增删改操作返回影响的行数
                 updateRows=ps.executeUpdate();
 
