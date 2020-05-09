@@ -1,6 +1,7 @@
 package com.at.wechair.controller;
 
 import com.at.wechair.service.LoginService;
+import com.at.wechair.util.FileUtil;
 import com.at.wechair.util.HttpRequest;
 
 
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.annotation.Resource;
@@ -45,7 +47,7 @@ public class LoginController {
 
     /**
      * 用户登录小程序通过微信接口获取用户信息
-     * <p>
+     *
      * 解密用户敏感数据
      *
      * @param encryptedData 加密数据
@@ -56,8 +58,6 @@ public class LoginController {
     public Map<String, Object> decodeUserInfo(@RequestParam(value = "encryptedData") String encryptedData,
                                               @RequestParam(value = "iv") String iv,
                                               @RequestParam(value = "code") String code) throws Exception {
-
-
         HashMap<String, Object> map = new HashMap<>(1000);
         // 登录凭证不能为空
         if (StringUtils.isNullOrEmpty(code)) {
@@ -74,6 +74,27 @@ public class LoginController {
         String sessionKey = (String) map.get("session_key");
         return loginService.decryptUserInfo(encryptedData, sessionKey, iv, map);
     }
+
+    // 文件名时间戳加随机数
+
+    @RequestMapping(value = "uploadImage")
+    public Map<String, Object> uploadImage(@RequestParam(value = "file") MultipartFile file){
+        HashMap<String, Object> map = new HashMap<>(1000);
+        String localPath = "/root/images";
+        String fileName = file.getOriginalFilename();
+        String newFileName = FileUtil.uploadImage(file, localPath, fileName);
+        if(newFileName != null){
+            map.put("status", 1);
+            map.put("msg", "上传成功");
+        }else{
+            map.put("status", 0);
+            map.put("msg", "上传失败");
+        }
+        return map;
+    }
+
+
+
 
     /**
      * 获取openid和session_key
