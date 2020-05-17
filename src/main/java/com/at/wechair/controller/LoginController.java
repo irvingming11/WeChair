@@ -30,7 +30,6 @@ import java.util.Map;
  */
 
 
-
 @RestController
 @RequestMapping(value = "LoginController")
 public class LoginController {
@@ -47,7 +46,6 @@ public class LoginController {
 
     /**
      * 用户登录小程序通过微信接口获取用户信息
-     *
      * 解密用户敏感数据
      *
      * @param encryptedData 加密数据
@@ -75,25 +73,44 @@ public class LoginController {
         return loginService.decryptUserInfo(encryptedData, sessionKey, iv, map);
     }
 
-    // 文件名时间戳加随机数
-
+    /**
+     * 上传学生证进行实名认证
+     * @param file  用户上传的学生证
+     * @param openId    用户的openId
+     * @return map
+     */
     @RequestMapping(value = "uploadImage")
-    public Map<String, Object> uploadImage(@RequestParam(value = "file") MultipartFile file){
+    public Map<String, Object> uploadImage(@RequestParam(value = "file") MultipartFile file,
+                                           @RequestParam(value = "open_id") String openId) {
         HashMap<String, Object> map = new HashMap<>(1000);
         String localPath = "/root/images";
         String fileName = file.getOriginalFilename();
         String newFileName = FileUtil.uploadImage(file, localPath, fileName);
-        if(newFileName != null){
+        if (newFileName != null) {
             map.put("status", 1);
             map.put("msg", "上传成功");
-        }else{
+            loginService.updateUserInfo(new Object[]{openId, newFileName});
+        } else {
             map.put("status", 0);
             map.put("msg", "上传失败");
         }
         return map;
     }
 
+    @RequestMapping(value = "getMessages")
+    public Map<String,Object> getMessages(@RequestParam(value = "open_id") String openId) {
+        HashMap<String, Object> map = new HashMap<>(1000);
+        return loginService.getUserAuthorities(openId, map);
+    }
 
+    @RequestMapping(value = "showUserRules")
+    public Map<String, Object> showUserRules(@RequestParam(value = "open_id") String openId) {
+        return null;
+    }
+    @RequestMapping(value = "sendSuggestions")
+    public Map<String, Object> sendSuggestions(){
+        return null;
+    }
 
 
     /**

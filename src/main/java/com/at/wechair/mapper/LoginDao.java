@@ -1,6 +1,5 @@
 package com.at.wechair.mapper;
 
-import com.at.wechair.entity.Account;
 import com.at.wechair.entity.OrdinaryUser;
 
 import java.util.HashMap;
@@ -27,7 +26,7 @@ public interface LoginDao {
     /**
      * 获取数据操作
      * @param map json数据
-     * @return String
+     * @return OrdinaryUser
      */
-    String getUserInfo(HashMap<String,Object> map);
+    OrdinaryUser getUserInfo(HashMap<String,Object> map);
 }

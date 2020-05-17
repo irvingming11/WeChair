@@ -1,6 +1,5 @@
 package com.at.wechair.service.impl;
 
-import com.at.wechair.entity.Account;
 import com.at.wechair.entity.OrdinaryUser;
 import com.at.wechair.mapper.LoginDao;
 import com.at.wechair.service.LoginService;
@@ -43,7 +42,7 @@ public class LoginServiceImpl implements LoginService {
     private static final String WOMAN = "0";
     @Override
     public boolean findOneUser(HashMap<String,Object> map) {
-        String userId = loginDao.getUserInfo(map);
+        String userId = loginDao.getUserInfo(map).getOpenId();
         if(userId == null){
             return false;
         }
@@ -51,21 +50,36 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public String getUserAuthorities(Account account) {
-        return null;
+    public HashMap<String,Object> getUserAuthorities(String openId,HashMap<String,Object> map) {
+        OrdinaryUser user = loginDao.getUserInfo(map);
+        try {
+            map.put("ownAuthority", user.getOwnAuthority());
+            if (user.getOpenId() != null) {
+                map.put("status", 1);
+                map.put("msg", "获取用户权限成功");
+            } else {
+                map.put("status", 0);
+                map.put("msg", "获取用户权限失败");
+            }
+        }catch(NullPointerException e){
+            e.printStackTrace();
+        }
+        return map;
     }
     @Override
     public HashMap<String, Object> decryptUserInfo(String encryptedData, String sessionKey,String iv,HashMap<String, Object> map) {
 
         try {
+            // 调用工具类方法对encryptedData加密数据进行AES解密
             String string = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
             JSONObject result = new JSONObject(string);
             map = getMap(result, map);
+            // 判断用户信息是否在数据库中
             if (findOneUser(map)) {
+                //存在的用户更新sessionKey和用户名
                 dealWithInfo(map.get("open_id"), sessionKey, map.get("nickName"));
             } else {
-
-                //对encryptedData加密数据进行AES解密
+                //不存在的用户将数据存储到数据库中
                 dealWithInfo(map);
             }
         }catch(Exception e){
@@ -103,12 +117,10 @@ public class LoginServiceImpl implements LoginService {
      * @param map   存储数据的map容器
      */
     public void dealWithInfo(Map<String, Object> map) {
-        Account account = new Account();
         OrdinaryUser user = new OrdinaryUser();
-        account.setOpenId((String) map.get("open_id"));
-        account.setSessionKey((String) map.get("session_key"));
+        user.setOpenId((String) map.get("open_id"));
+        user.setSessionKey((String) map.get("session_key"));
         user.setUserName((String) map.get("nickName"));
-        user.setWeChatName((String) map.get("nickName"));
         String gender = map.get("gender").toString();
         if (MAN.equals(gender)) {
             user.setSex("男");
@@ -118,7 +130,7 @@ public class LoginServiceImpl implements LoginService {
 
             System.out.println("性别信息获取异常");
         }
-        boolean result = storageUserInfo(account, user);
+        boolean result = storageUserInfo(user);
         if (result) {
             System.out.println("数据存储成功");
         } else {
@@ -133,7 +145,8 @@ public class LoginServiceImpl implements LoginService {
      * @param userName      用户名
      */
     public void dealWithInfo(Object openId, String sessionKey, Object userName){
-        if(updateUserInfo(openId.toString(), sessionKey,userName.toString())){
+        Object[] params = {sessionKey,userName.toString(),openId.toString()};
+        if(updateUserInfo(params)){
             System.out.println("数据库更新成功");
         }else{
             System.out.println("数据库更新失败");
@@ -141,14 +154,13 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public boolean storageUserInfo(Account account, OrdinaryUser user) {
-        Object[] params = {account.getOpenId(),user.getSex(),user.getWeChatName(),account.getSessionKey(),account.getOwnAuthority()};
+    public boolean storageUserInfo(OrdinaryUser user) {
+        Object[] params = {user.getOpenId(),user.getSex(),user.getUserName(),user.getSessionKey(),user.getOwnAuthority()};
         return loginDao.dataOperation(addSql,params);
     }
 
     @Override
-    public boolean updateUserInfo(String openId, String sessionKey,String userName) {
-        Object[] params = {sessionKey,userName,openId};
+    public boolean updateUserInfo(Object[] params) {
         return loginDao.dataOperation(updateSql,params);
 
     }

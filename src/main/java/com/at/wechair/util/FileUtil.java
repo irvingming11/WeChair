@@ -33,12 +33,12 @@ public class FileUtil {
     }
 
     /**
-     *  获取文件后缀名
+     *  获取新的文件名，时间戳+随机数+后缀名
      * @param fileOriginName   源文件名
      * @return  String
      */
     public static String getNewFileName(String fileOriginName) {
-        return System.currentTimeMillis() + UUID.randomUUID().toString() + getSuffix(fileOriginName);
+        return System.currentTimeMillis() + UUID.randomUUID().toString() + "." + getSuffix(fileOriginName);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.at.wechair.mapper;
 
+import com.at.wechair.entity.OrdinaryUser;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -35,24 +36,30 @@ public class LoginDaoImpl extends BaseDao implements LoginDao{
 
 
     @Override
-    public String getUserInfo(HashMap<String,Object> map) {
+    public OrdinaryUser getUserInfo(HashMap<String,Object> map) {
         String sql = "select * from Student where UserID = ?";
         Object[] params = {map.get("open_id")};
         ResultSet rs = super.executeQuery(sql,params);
+        OrdinaryUser user = null;
         if(rs == null){
             return null;
         }else {
-            String result = null;
             try {
+                user = new OrdinaryUser();
                 while(rs.next()) {
-                    result = rs.getString("UserID");
+                    String openId = rs.getString("UserID");
+                    String sessionKey = rs.getString("Password");
+                    int ownAuthority = rs.getInt("warrant");
+                    user.setOpenId(openId);
+                    user.setSessionKey(sessionKey);
+                    user.setOwnAuthority(ownAuthority);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
                 super.closeResource();
             }
-            return result;
+            return user;
         }
     }
 
