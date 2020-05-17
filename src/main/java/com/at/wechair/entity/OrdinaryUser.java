@@ -29,13 +29,16 @@ import lombok.*;
 
 public class OrdinaryUser{
     public String  userName;
-    public String weChatName;
     private String sex;
     private String phoneNumber;
+    private boolean blackListStatus = false;
+    private String openId;
+    private String sessionKey;
+    private int ownAuthority = 400;
     //无效离座次数
 
     private int invalidLeaveChairTime;
-    private boolean certificationStatus = false;
+
 
     //更换头像
 
@@ -84,8 +87,6 @@ public class OrdinaryUser{
     public void applyLeaveChair(){
 
     }
-    public boolean showCertificationStatus(){
-        return this.certificationStatus;
-    }
+
 
 }

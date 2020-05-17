@@ -24,7 +24,7 @@ import java.util.Date;
 @Validated
 
 public class StudentUser extends OrdinaryUser{
-    private String name;
+    private String realName;
 
     // 自定义一个@Student注解来对学号进行校验
 

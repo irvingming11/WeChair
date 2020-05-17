@@ -1,6 +1,5 @@
 package com.at.wechair.service;
 
-import com.at.wechair.entity.Account;
 import com.at.wechair.entity.OrdinaryUser;
 import org.json.JSONException;
 
@@ -26,17 +25,14 @@ public interface LoginService {
     boolean findOneUser(HashMap<String,Object> map);
     /**
      * 获取用户权限
-     * @param account  账户类
-     * @return boolean
+     * @param openId  用户的openId
+     * @param map   存储用户信息的集合
+     * @return HashMap
      */
-    String getUserAuthorities(Account account);
+    HashMap<String,Object> getUserAuthorities(String openId,HashMap<String,Object> map);
 
     /**
      * 解密用户信息
-     *
-     *
-     *
-     *
      * @param encryptedData     用户的加密数据
      * @param sessionKey        用户的session_key
      * @param iv                用户的密钥
@@ -48,19 +44,16 @@ public interface LoginService {
 
     /**
      * 存储用户信息
-     * @param account   账户
      * @param user      用户
      * @return boolean
      */
-    boolean storageUserInfo(Account account, OrdinaryUser user);
+    boolean storageUserInfo(OrdinaryUser user);
 
     /**
-     * 获取已经存在数据库中的用户信息，并更新session_key和用户名
-     * @param openId       用户的open_id
-     * @param sessionKey    用户的session_key
-     * @param userName      用户名
-     * @return HashMap
+     * 更新用户信息
+     * @param params    用户更新信息集合
+     * @return  boolean
      */
-    boolean updateUserInfo(String openId, String sessionKey,String userName);
+    boolean updateUserInfo(Object[] params);
 
 }
