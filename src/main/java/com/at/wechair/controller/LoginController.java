@@ -76,12 +76,10 @@ public class LoginController {
     /**
      * 上传学生证进行实名认证
      * @param file  用户上传的学生证
-     * @param openId    用户的openId
      * @return map
      */
-    @RequestMapping(value = "uploadImage")
-    public Map<String, Object> uploadImage(@RequestParam(value = "file") MultipartFile file,
-                                           @RequestParam(value = "open_id") String openId) {
+    @RequestMapping(value = "uploadImage" , produces = "application/json")
+    public Map<String, Object> uploadImage(@RequestParam(value = "file") MultipartFile file) {
         HashMap<String, Object> map = new HashMap<>(1000);
         String localPath = "/root/images";
         String fileName = file.getOriginalFilename();
@@ -89,7 +87,6 @@ public class LoginController {
         if (newFileName != null) {
             map.put("status", 1);
             map.put("msg", "上传成功");
-            loginService.updateUserInfo(new Object[]{openId, newFileName});
         } else {
             map.put("status", 0);
             map.put("msg", "上传失败");
