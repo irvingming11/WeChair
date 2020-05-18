@@ -21,7 +21,7 @@ public class FileUtil {
         File img = new File(realPath);
         // 判断父级目录是否存在
         if(!img.getParentFile().exists()){
-            img.getParentFile().mkdir();
+            img.getParentFile().mkdirs();
         }
         try{
             file.transferTo(img);
@@ -38,7 +38,7 @@ public class FileUtil {
      * @return  String
      */
     public static String getNewFileName(String fileOriginName) {
-        return System.currentTimeMillis() + UUID.randomUUID().toString() + "." + getSuffix(fileOriginName);
+        return System.currentTimeMillis() + UUID.randomUUID().toString() + getSuffix(fileOriginName);
     }
 
     /**
