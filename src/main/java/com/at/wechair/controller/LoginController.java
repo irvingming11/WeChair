@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.annotation.Resource;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,7 @@ public class LoginController {
     private static final String GRANT_TYPE = "authorization_code";
     @Resource
     private LoginService loginService;
+    public HashMap<String,Object> map = new HashMap<>(1000);
 
 
     /**
@@ -56,7 +58,6 @@ public class LoginController {
     public Map<String, Object> decodeUserInfo(@RequestParam(value = "encryptedData") String encryptedData,
                                               @RequestParam(value = "iv") String iv,
                                               @RequestParam(value = "code") String code) throws Exception {
-        HashMap<String, Object> map = new HashMap<>(1000);
         // 登录凭证不能为空
         if (StringUtils.isNullOrEmpty(code)) {
             map.put("status", 0);
@@ -80,11 +81,11 @@ public class LoginController {
      */
     @RequestMapping(value = "uploadImage" , produces = "application/json")
     public Map<String, Object> uploadImage(@RequestParam(value = "file") MultipartFile file) {
-        HashMap<String, Object> map = new HashMap<>(1000);
         String localPath = "/root/images";
         String fileName = file.getOriginalFilename();
         String newFileName = FileUtil.uploadImage(file, localPath, fileName);
-        if (newFileName != null) {
+        map.put("pic",newFileName);
+        if (newFileName != null && loginService.updateUserImage(new String[]{newFileName, (String) map.get("open_id")})) {
             map.put("status", 1);
             map.put("msg", "上传成功");
         } else {
@@ -118,7 +119,8 @@ public class LoginController {
      * @return map
      * @throws JSONException JSON对象异常
      */
-    public HashMap<String, Object> getMap(String params, HashMap<String, Object> map) throws JSONException {
+    public HashMap<String, Object>
+    getMap(String params, HashMap<String, Object> map) throws JSONException {
         // 发送请求
         String str = HttpRequest.sendGet("https://api.weixin.qq.com/sns/jscode2session", params);
         // 解析相应内容（转换成json对象）

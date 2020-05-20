@@ -101,7 +101,6 @@ public class BaseDao {
                 }
                 // 对数据库执行增删改操作返回影响的行数
                 updateRows=ps.executeUpdate();
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
