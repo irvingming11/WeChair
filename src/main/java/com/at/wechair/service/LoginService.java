@@ -56,4 +56,10 @@ public interface LoginService {
      */
     boolean updateUserInfo(Object[] params);
 
+    /**
+     * 更新上传的图片名到数据库
+     * @param params   数据库操作对象
+     * @return boolean
+     */
+    boolean updateUserImage(Object[] params);
 }

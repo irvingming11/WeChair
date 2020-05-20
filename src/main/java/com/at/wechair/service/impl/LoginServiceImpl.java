@@ -32,12 +32,16 @@ import java.util.Map;
 @Service
 public class LoginServiceImpl implements LoginService {
     private static final String OPEN_ID = "open_id";
+    private static final String PIC = "pic";
+    private OrdinaryUser user = new OrdinaryUser();
     @Resource
     private LoginDao loginDao;
     @Value("${login.addSql}")
     private String addSql;
-    @Value("${login.updateSql}")
-    private String updateSql;
+    @Value("${login.updateInfoSql}")
+    private String updateInfoSql;
+    @Value("${login.updateImageSql}")
+    private String updateImageSql;
     private static final String MAN = "1";
     private static final String WOMAN = "0";
     @Override
@@ -73,17 +77,17 @@ public class LoginServiceImpl implements LoginService {
             // 调用工具类方法对encryptedData加密数据进行AES解密
             String string = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
             JSONObject result = new JSONObject(string);
-            map = getMap(result, map);
-            // 判断用户信息是否在数据库中
+            map = getMap(result,map);
             if (findOneUser(map)) {
-                //存在的用户更新sessionKey和用户名
-                dealWithInfo(map.get("open_id"), sessionKey, map.get("nickName"));
+                //存在的用户更新用户数据
+                dealWithInfo(map.get(OPEN_ID), (String) map.get("session_key"), map.get("nickName"));
             } else {
                 //不存在的用户将数据存储到数据库中
                 dealWithInfo(map);
             }
+            return map;
         }catch(Exception e){
-            System.out.println("出现了点小问题，请重新登录");
+            e.printStackTrace();
         }
         return  map;
     }
@@ -105,7 +109,6 @@ public class LoginServiceImpl implements LoginService {
             map.put("province", result.get("province"));
             map.put("country", result.get("country"));
             map.put("avatarUrl", result.get("avatarUrl"));
-
         } else {
             map.put("status", 0);
             map.put("msg", "解密失败");
@@ -117,7 +120,6 @@ public class LoginServiceImpl implements LoginService {
      * @param map   存储数据的map容器
      */
     public void dealWithInfo(Map<String, Object> map) {
-        OrdinaryUser user = new OrdinaryUser();
         user.setOpenId((String) map.get("open_id"));
         user.setSessionKey((String) map.get("session_key"));
         user.setUserName((String) map.get("nickName"));
@@ -147,9 +149,9 @@ public class LoginServiceImpl implements LoginService {
     public void dealWithInfo(Object openId, String sessionKey, Object userName){
         Object[] params = {sessionKey,userName.toString(),openId.toString()};
         if(updateUserInfo(params)){
-            System.out.println("数据库更新成功");
+            System.out.println("用户信息更新成功");
         }else{
-            System.out.println("数据库更新失败");
+            System.out.println("用户信息更新失败");
         }
     }
 
@@ -161,8 +163,13 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public boolean updateUserInfo(Object[] params) {
-        return loginDao.dataOperation(updateSql,params);
+        return loginDao.dataOperation(updateInfoSql,params);
 
+    }
+
+    @Override
+    public boolean updateUserImage(Object[] params) {
+        return loginDao.dataOperation(updateImageSql,params);
     }
 
 
