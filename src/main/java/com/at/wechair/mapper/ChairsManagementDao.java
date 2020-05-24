@@ -9,4 +9,11 @@ package com.at.wechair.mapper;
  * @Description
  */
 public interface ChairsManagementDao {
+    /**
+     * 统计剩余座位数量
+     * @param sql   查询语句
+     * @param params    对象集合
+     * @return int
+     */
+    int chairsCounters(String sql,Object[] params);
 }
