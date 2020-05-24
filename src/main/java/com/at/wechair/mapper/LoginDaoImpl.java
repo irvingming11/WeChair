@@ -18,6 +18,8 @@ import java.util.HashMap;
 
 @Repository
 public class LoginDaoImpl extends BaseDao implements LoginDao{
+    //受影响行数
+
     private int operatedResult = 0;
 
 
