@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,5 +42,18 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
             }
         }
         return counter;
+    }
+    @Override
+    public ArrayList<Integer> getMarks(ArrayList<Integer> list,String sql,Object[] params)  {
+        ResultSet rs = super.executeQuery(sql,params);
+        int i = 0;
+        try{
+            while (rs.next()) {
+                list.add(rs.getInt(++i));
+            }
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

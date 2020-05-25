@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,14 +23,12 @@ import java.util.Map;
  * @Time: 17:23
  * @Description
  */
-@Component
-@PropertySource(value = "classpath:/sql.properties")
-@ConfigurationProperties(prefix = "chairs")
-@Transactional(rollbackFor = Exception.class)
+
 @Service
 public class ChairsManagementServiceImpl implements ChairsManagementService {
-    @Value("${chairs.selectChairsNumberSql}")
-    private String countSql;
+
+    @Value("${chairs.selectChairsStatusSql}")
+    private String statusSql;
     @Resource
     private ChairsManagementDao chairsDao;
     @Resource
@@ -39,9 +38,15 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
      */
     private static final int OU_AUTHORITY = 400;
     @Override
-    public int getChairsCount(int mark){
-        Object[] params = {mark};
-        return chairsDao.chairsCounters(countSql,params);
+    public int getChairsCount(String sql,Object param){
+        Object[] params = {param};
+        return chairsDao.chairsCounters(sql,params);
+    }
+    @Override
+    public ArrayList<Integer> getChairStatus(ArrayList<Integer> list){
+        Object[] params = {};
+        list = chairsDao.getMarks(list,statusSql,params);
+        return list;
     }
     @Override
     public Map<String, Object> getUserInfo(String openId) {
