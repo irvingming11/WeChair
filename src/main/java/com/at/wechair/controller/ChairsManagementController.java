@@ -53,14 +53,22 @@ public class ChairsManagementController {
     @RequestMapping(value = "seatReservation")
     public Map<String, Object> seatReservation(@RequestParam(value = "open_id") String openId,@RequestParam(value = "number")int chairNumber){
         map.put("open_id", openId);
+        //判断用户权限
         boolean result = chairService.judgeUserAuthority(map);
         if(result){
+            //获取用户正使用的座位数量
             int ownNumber = chairService.getChairsCount(ownChairSql,openId);
+            //获取用户已预约的座位数量
             int reservedNumber = chairService.getChairsCount(reservationSql, openId);
             if(ownNumber == 0 && reservedNumber == 0){
-
+                //更新数据库座位状态
+                if(chairService.updateStatus(chairNumber)){
+                    map.put("reservation", "预约成功");
+                }else{
+                    map.put("reservation", "数据库操作失败");
+                }
             }else{
-
+                map.put("reservation","有已预约和正使用的座位");
             }
         }else{
             map.put("authority","未授权");

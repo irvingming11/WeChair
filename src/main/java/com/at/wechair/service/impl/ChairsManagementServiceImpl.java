@@ -29,6 +29,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
 
     @Value("${chairs.selectChairsStatusSql}")
     private String statusSql;
+    @Value("${chairs.updateReservationSql}")
+    private String reservationSql;
     @Resource
     private ChairsManagementDao chairsDao;
     @Resource
@@ -57,5 +59,11 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     public boolean judgeUserAuthority(HashMap<String, Object> map){
         int authority = (int) loginService.getUserAuthorities(map.get("open_id").toString(),map).get("ownAuthority");
         return authority != OU_AUTHORITY;
+    }
+    @Override
+    public boolean updateStatus(int seatId){
+        Object[] params = {2,seatId};
+        return chairsDao.updateSeatStatus(reservationSql,params);
+
     }
 }

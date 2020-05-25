@@ -56,4 +56,9 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
         }
         return list;
     }
+    @Override
+    public boolean updateSeatStatus(String sql,Object[] params){
+        int resultRow = super.executeUpdate(sql,params);
+        return resultRow != 0;
+    }
 }
