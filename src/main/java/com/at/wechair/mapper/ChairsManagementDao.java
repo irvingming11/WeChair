@@ -29,5 +29,13 @@ public interface ChairsManagementDao {
      */
     ArrayList<Integer> getMarks(ArrayList<Integer> list, String sql, Object[] params);
 
+    /**
+     * 更新数据库座位状态
+     * @param sql sql
+     * @param params  存储更新对象的集合
+     * @return boolean
+     */
+    boolean updateSeatStatus(String sql,Object[] params);
+
 
 }

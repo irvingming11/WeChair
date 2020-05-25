@@ -42,4 +42,11 @@ public interface ChairsManagementService {
      * @return boolean
      */
     boolean judgeUserAuthority(HashMap<String,Object> map);
+
+    /**
+     * 更新座位状态
+     * @param seatId 座位号
+     * @return boolean
+     */
+    boolean updateStatus(int seatId);
 }
