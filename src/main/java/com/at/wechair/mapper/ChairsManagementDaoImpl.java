@@ -20,13 +20,13 @@ import java.util.ArrayList;
 @Repository
 public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagementDao {
     @Override
-    public int chairsCounters(String sql,Object[] params) {
-        ResultSet rs =  super.executeQuery(sql,params);
+    public int chairsCounters(String sql, Object[] params) {
+        ResultSet rs = super.executeQuery(sql, params);
         int counter = 0;
-        if(rs == null){
+        if (rs == null) {
             return -1;
-        }else{
-            while(true){
+        } else {
+            while (true) {
                 try {
                     if (!rs.next()) {
                         break;
@@ -43,22 +43,57 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
         }
         return counter;
     }
-    @Override
-    public ArrayList<Integer> getMarks(ArrayList<Integer> list,String sql,Object[] params)  {
-        ResultSet rs = super.executeQuery(sql,params);
-        int i = 0;
+
+    public Object selectData(String sql, Object[] params) {
+        ResultSet rs = super.executeQuery(sql, params);
+        Object result = null;
         try{
-            while (rs.next()) {
-                list.add(rs.getInt(++i));
+            while(rs.next()){
+                result = rs.getObject(1);
             }
         }catch (SQLException e) {
             e.printStackTrace();
         }
+        return result;
+    }
+
+    public boolean updateData(String sql, Object[] params) {
+        return super.executeUpdate(sql, params) != 0;
+    }
+
+    @Override
+    public ArrayList<String> getMarks(ArrayList<String> list, String sql, Object[] params) {
+        ResultSet rs = super.executeQuery(sql, params);
+        int i = 0;
+        try {
+            while (rs.next()) {
+                list.add(rs.getString(++i));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
+
     @Override
-    public boolean updateSeatStatus(String sql,Object[] params){
-        int resultRow = super.executeUpdate(sql,params);
+    public boolean updateSeatStatus(String sql, Object[] params) {
+        int resultRow = super.executeUpdate(sql, params);
         return resultRow != 0;
     }
+
+    @Override
+    public int getViolationNumber(String sql, Object[] params) {
+        ResultSet rs = super.executeQuery(sql, params);
+        int result = 0;
+        try {
+            while (rs.next()) {
+                result = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
 }
