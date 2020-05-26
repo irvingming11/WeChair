@@ -38,6 +38,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     private String reservationSql;
     @Value("${chairs.selectViolationNumberSql}")
     private String violationSql;
+    @Value("${chairs.selectLoginStatusSql}")
+    private String loginStatusSql;
     @Resource
     private ChairsManagementDao chairsDao;
     @Resource
@@ -50,7 +52,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     @Override
     public int getChairsCount(String sql,Object param){
         Object[] params = {param};
-        return chairsDao.chairsCounters(sql,params);
+        return (int)chairsDao.selectData(sql,params);
     }
 
     @Override
@@ -62,9 +64,13 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
 
     /**
      * 判断登录状态
+     * @param openId 用户的open_id
+     * @return boolean
      */
-    public boolean judgeLoginStatus(){
-        return true;
+    public boolean judgeLoginStatus(String openId,String sessionKey){
+        Object[] params = {openId};
+        String oldSessionKey = chairsDao.selectData(loginStatusSql,params).toString();
+        return oldSessionKey.equals(sessionKey);
     }
     /**
      * 判断用户权限
@@ -82,8 +88,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
      * @return boolean
      */
     public boolean updateStatus(int seatId){
-        Object[] params = {2,seatId};
-        return chairsDao.updateSeatStatus(reservationSql,params);
+        Object[] params = {"orange",seatId};
+        return chairsDao.updateData(reservationSql,params);
 
     }
     /**
@@ -93,33 +99,37 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
      */
     public boolean judgeUserViolationStatus(String openId){
         Object[] params = {openId, 3};
-        int number = chairsDao.getViolationNumber(violationSql, params);
+        int number = (int)chairsDao.selectData(violationSql, params);
         return number == 3;
     }
     @Override
     public HashMap<String, Object> userReservation(HashMap<String, Object> map){
-        //判断用户权限
-        boolean result = judgeUserAuthority(map);
         String openId = map.get("open_id").toString();
-        int chairNumber = (int) map.get("chairNumber");
-        if(result){
-            //获取用户正使用的座位数量
-            int ownNumber = getChairsCount(ownChairSql,openId);
-            //获取用户已预约的座位数量
-            int reservedNumber = getChairsCount(reservationChairSql, openId);
-            boolean violationStatus = judgeUserViolationStatus(openId);
-            if(ownNumber == 0 && reservedNumber == 0 && !violationStatus){
-                //更新数据库座位状态
-                if(updateStatus(chairNumber)){
-                    map.put("reservation", "预约成功");
-                }else{
-                    map.put("reservation", "数据库操作失败");
+        String sessionKey = map.get("session_key").toString();
+        int chairNumber = (int) map.get("chair_number");
+        if(judgeLoginStatus(openId,sessionKey)) {
+            //判断用户权限
+            if (judgeUserAuthority(map)) {
+                //获取用户正使用的座位数量
+                int ownNumber = getChairsCount(ownChairSql, openId);
+                //获取用户已预约的座位数量
+                int reservedNumber = getChairsCount(reservationChairSql, openId);
+                boolean violationStatus = judgeUserViolationStatus(openId);
+                if (ownNumber == 0 && reservedNumber == 0 && !violationStatus) {
+                    //更新数据库座位状态
+                    if (updateStatus(chairNumber)) {
+                        map.put("reservation", "预约成功");
+                    } else {
+                        map.put("reservation", "数据库操作失败");
+                    }
+                } else {
+                    map.put("reservation", "有已预约和正使用的座位，预约失败");
                 }
-            }else{
-                map.put("reservation","有已预约和正使用的座位，预约失败");
+            } else {
+                map.put("authority", "未授权");
             }
         }else{
-            map.put("authority","未授权");
+            map.put("msg","登录态失效");
         }
         return map;
     }

@@ -1,6 +1,5 @@
 package com.at.wechair.mapper;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 
 /**
@@ -12,14 +11,24 @@ import java.util.ArrayList;
  * @Description
  */
 public interface ChairsManagementDao {
-    /**
-     * 统计剩余座位数量或统计用户正使用座位数和已预约座位数
-     * @param sql   查询语句
-     * @param params    对象集合
-     * @return int
-     */
-    int chairsCounters(String sql,Object[] params);
 
+
+
+    /**
+     * 查询数据库中的数据
+     * @param sql sql
+     * @param params 保存查询对象的集合
+     * @return Object
+     */
+    Object selectData(String sql, Object[] params);
+
+    /**
+     * 更新数据库中的数据
+     * @param sql   sql
+     * @param params    保存查询对象的集合
+     * @return boolean
+     */
+    boolean updateData(String sql, Object[] params);
     /**
      * 从数据库获取每个座位的状态
      * @param list 存储座位状态的集合
@@ -29,20 +38,6 @@ public interface ChairsManagementDao {
      */
     ArrayList<String> getMarks(ArrayList<String> list, String sql, Object[] params);
 
-    /**
-     * 更新数据库座位状态
-     * @param sql sql
-     * @param params  存储更新对象的集合
-     * @return boolean
-     */
-    boolean updateSeatStatus(String sql,Object[] params);
 
-    /**
-     * 获取用户违规预约次数
-     * @param sql   sql
-     * @param params    存储更新对象的集合
-     * @return int
-     */
-    int getViolationNumber(String sql,Object[] params);
 
 }
