@@ -27,7 +27,7 @@ public interface ChairsManagementDao {
      * @param params   查询的对象集合
      * @return ArrayList
      */
-    ArrayList<Integer> getMarks(ArrayList<Integer> list, String sql, Object[] params);
+    ArrayList<String> getMarks(ArrayList<String> list, String sql, Object[] params);
 
     /**
      * 更新数据库座位状态
@@ -37,5 +37,12 @@ public interface ChairsManagementDao {
      */
     boolean updateSeatStatus(String sql,Object[] params);
 
+    /**
+     * 获取用户违规预约次数
+     * @param sql   sql
+     * @param params    存储更新对象的集合
+     * @return int
+     */
+    int getViolationNumber(String sql,Object[] params);
 
 }

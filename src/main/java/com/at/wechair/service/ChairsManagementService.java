@@ -26,27 +26,12 @@ public interface ChairsManagementService {
      * @param list 存储状态信息的集合
      * @return ArrayList
      */
-    ArrayList<Integer> getChairStatus(ArrayList<Integer> list);
-
-
-    /**
-     * 获取用户信息，包括正使用的座位数和预约座位数
-     * @param openId    用户的open_id
-     * @return map
-     */
-    Map<String,Object> getUserInfo(String openId);
+    ArrayList<String> getChairStatus(ArrayList<String> list);
 
     /**
-     * 判断用户权限
-     * @param map   存储信息的集合
-     * @return boolean
+     * 用户预约座位
+     * @param map 存储信息的集合
+     * @return HashMap
      */
-    boolean judgeUserAuthority(HashMap<String,Object> map);
-
-    /**
-     * 更新座位状态
-     * @param seatId 座位号
-     * @return boolean
-     */
-    boolean updateStatus(int seatId);
+    HashMap<String,Object> userReservation(HashMap<String,Object> map);
 }

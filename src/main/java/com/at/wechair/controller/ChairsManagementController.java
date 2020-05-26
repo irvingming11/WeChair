@@ -22,58 +22,64 @@ import java.util.Map;
  * @Time: 17:23
  * @Description
  */
-@Component
-@PropertySource(value = "classpath:/sql.properties")
-@ConfigurationProperties(prefix = "chairs")
 @RestController
 @RequestMapping(value = "ChairsManagementController")
 public class ChairsManagementController {
     public HashMap<String,Object> map = new HashMap<>(1000);
     @Value("${chairs.selectChairsNumberSql}")
     private String countSql;
-    @Value("${chairs.selectOwnChairSql}")
-    private String ownChairSql;
-    @Value("${chairs.selectReservationChairSql}")
-    private String reservationSql;
     @Resource
     private ChairsManagementService chairService;
+
+    /**
+     * 选座功能：
+     *      剩余座位数量
+     *      所有座位状态
+     *
+     *
+     */
     @RequestMapping(value = "showChairsDistribution")
     public Map<String, Object> showChairsDistribution() {
+        //统计剩余空座数量
         int count = chairService.getChairsCount(countSql,0);
-        ArrayList<Integer> list = new ArrayList<>(1000);
+        ArrayList<String> list = new ArrayList<>(1000);
+        //获取所有座位状态
         list = chairService.getChairStatus(list);
         if(count <= 0){
             map.put("msg","数据库操作异常");
         }else{
-            map.put("number",count);
+            map.put("number", count);
             map.put("chair_list",list);
         }
         return map;
     }
+    /**
+     * 预约功能：
+     *      判断登录状态（待完成）
+     *      判断用户权限（已完成）
+     *      获取用户正使用和已预约座位数（已完成）
+     *      判断用户黑名单状态（部分完成）{查询预约记录表，发现一天内有三次记录的状态都是违约，用户当天无法预约}
+     *          设置时间限制（24小时）
+     *      更新座位状态（已完成）
+     * 预约查看功能：
+     *      更新预约查看记录状态（待完成）
+     *      记录预约时间（待完成）
+     *      预约倒计时（待完成）
+     *      取消预约（待完成）：
+     *          用户自动取消预约
+     *          超出预约有效时间
+     *      更新预约状态（待完成）
+     *      更新取消座位状态（待完成）
+     *      更新用户取消预约次数（待完成）
+     *      更新用户黑名单状态（待完成
+     */
     @RequestMapping(value = "seatReservation")
-    public Map<String, Object> seatReservation(@RequestParam(value = "open_id") String openId,@RequestParam(value = "number")int chairNumber){
+    public Map<String, Object> seatReservation(@RequestParam(value = "open_id") String openId,@RequestParam(value = "session_key") String sessionKey,@RequestParam(value = "number")int chairNumber){
         map.put("open_id", openId);
-        //判断用户权限
-        boolean result = chairService.judgeUserAuthority(map);
-        if(result){
-            //获取用户正使用的座位数量
-            int ownNumber = chairService.getChairsCount(ownChairSql,openId);
-            //获取用户已预约的座位数量
-            int reservedNumber = chairService.getChairsCount(reservationSql, openId);
-            if(ownNumber == 0 && reservedNumber == 0){
-                //更新数据库座位状态
-                if(chairService.updateStatus(chairNumber)){
-                    map.put("reservation", "预约成功");
-                }else{
-                    map.put("reservation", "数据库操作失败");
-                }
-            }else{
-                map.put("reservation","有已预约和正使用的座位");
-            }
-        }else{
-            map.put("authority","未授权");
-        }
         map.put("chairNumber",chairNumber);
+        map.put("session_key", sessionKey);
+        //用户预约
+        map = chairService.userReservation(map);
         return map;
     }
 }
