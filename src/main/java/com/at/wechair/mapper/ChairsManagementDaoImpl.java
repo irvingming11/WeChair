@@ -36,7 +36,7 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
     }
 
     @Override
-    public HashMap<String,String> getMarks(HashMap<String,String> map, String sql, Object[] params) {
+    public HashMap<String,Object> getMarks(HashMap<String,Object> map, String sql, Object[] params) {
         ResultSet rs = super.executeQuery(sql, params);
         try {
             while (rs.next()) {

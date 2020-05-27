@@ -38,18 +38,18 @@ public class ChairsManagementController {
     @RequestMapping(value = "showChairsDistribution")
     public Map<String, Object> showChairsDistribution() {
         //统计剩余空座数量
-        int count = chairService.getChairsCount(countSql,"green");
-        HashMap<String,String> chairStatus = new HashMap<>(1000);
+//        int count = chairService.getChairsCount(countSql,"green");
+        HashMap<String,Object> chairStatus = new HashMap<>(1000);
         //获取所有座位状态
         chairStatus = chairService.getChairStatus(chairStatus);
-        if(count < 0){
-            map.put("msg","数据库操作异常");
-        }else{
-            map.put("number", count);
-            map.put("chairs_status",chairStatus);
-
-        }
-        return map;
+//        if(count < 0){
+//            map.put("msg","数据库操作异常");
+//        }else{
+//            map.put("number", count);
+//            map.put("chairs_status",chairStatus);
+//
+//        }
+        return chairStatus;
     }
     /**
      * 预约功能：
@@ -64,7 +64,7 @@ public class ChairsManagementController {
     @RequestMapping(value = "seatReservation")
     public Map<String, Object> seatReservation(@RequestParam(value = "open_id") String openId,
                                                @RequestParam(value = "session_key") String sessionKey,
-                                               @RequestParam(value = "number")String chairNumber){
+                                               @RequestParam(value = "seat_num")String chairNumber){
         map.put("open_id", openId);
         map.put("chairNumber",chairNumber);
         map.put("session_key", sessionKey);

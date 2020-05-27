@@ -19,14 +19,14 @@ public interface ChairsManagementService {
      * @param sql sql
      * @return int
      */
-    int getChairsCount(String sql,Object param);
+    int getChairsCount(String sql,String param);
 
     /**
      * 获取座位状态
      * @param map 存储状态信息的集合
      * @return HashMap
      */
-    HashMap<String,String> getChairStatus(HashMap<String,String> map);
+    HashMap<String,Object> getChairStatus(HashMap<String,Object> map);
 
     /**
      * 用户预约座位

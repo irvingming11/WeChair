@@ -37,7 +37,7 @@ public interface ChairsManagementDao {
      * @param params   查询的对象集合
      * @return HashMap
      */
-    HashMap<String,String> getMarks(HashMap<String,String> map, String sql, Object[] params);
+    HashMap<String,Object> getMarks(HashMap<String,Object> map, String sql, Object[] params);
 
 
 

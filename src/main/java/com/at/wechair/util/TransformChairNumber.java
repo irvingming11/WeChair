@@ -24,7 +24,7 @@ public class TransformChairNumber {
         String [] str = chairNumber.split("_");
         int [] result = new int[2];
         for(int i = 0;i < str.length;i++) {
-            for (int j = 0; j <= number.length; j++) {
+            for (int j = 0; j < number.length; j++) {
                 if (str[i].equals(number[j])) {
                     result[i] = j + 1;
                 }
@@ -39,7 +39,7 @@ public class TransformChairNumber {
      * @return String
      */
     public static String transform(int tableId,int seatId){
-        return number[tableId] + "_" + number[seatId];
+        return number[tableId-1] + "_" + number[seatId-1];
     }
 }
 
