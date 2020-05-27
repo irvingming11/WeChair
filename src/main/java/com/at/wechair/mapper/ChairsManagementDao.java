@@ -1,6 +1,7 @@
 package com.at.wechair.mapper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,12 +32,12 @@ public interface ChairsManagementDao {
     boolean updateData(String sql, Object[] params);
     /**
      * 从数据库获取每个座位的状态
-     * @param list 存储座位状态的集合
+     * @param map 存储座位状态的集合
      * @param sql   查询的sql语句
      * @param params   查询的对象集合
-     * @return ArrayList
+     * @return HashMap
      */
-    ArrayList<String> getMarks(ArrayList<String> list, String sql, Object[] params);
+    HashMap<String,Object> getMarks(HashMap<String,Object> map, String sql, Object[] params);
 
 
 
