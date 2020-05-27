@@ -23,10 +23,10 @@ public interface ChairsManagementService {
 
     /**
      * 获取座位状态
-     * @param list 存储状态信息的集合
-     * @return ArrayList
+     * @param map 存储状态信息的集合
+     * @return HashMap
      */
-    ArrayList<String> getChairStatus(ArrayList<String> list);
+    HashMap<String,String> getChairStatus(HashMap<String,String> map);
 
     /**
      * 用户预约座位

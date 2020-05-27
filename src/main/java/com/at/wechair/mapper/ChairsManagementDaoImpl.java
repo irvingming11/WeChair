@@ -1,9 +1,11 @@
 package com.at.wechair.mapper;
 
+import com.at.wechair.util.TransformChairNumber;
 import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by IntelliJ IDEA.
@@ -34,16 +36,18 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
     }
 
     @Override
-    public ArrayList<String> getMarks(ArrayList<String> list, String sql, Object[] params) {
+    public HashMap<String,String> getMarks(HashMap<String,String> map, String sql, Object[] params) {
         ResultSet rs = super.executeQuery(sql, params);
-        int i = 0;
         try {
             while (rs.next()) {
-                list.add(rs.getString(++i));
+                int tableId = rs.getInt("TableId");
+                int seatId = rs.getInt("SeatId");
+                String mark = rs.getString("Mark");
+                map.put(TransformChairNumber.transform(tableId, seatId),mark);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return list;
+        return map;
     }
 }

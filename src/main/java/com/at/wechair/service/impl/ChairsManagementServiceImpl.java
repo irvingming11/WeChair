@@ -3,6 +3,7 @@ package com.at.wechair.service.impl;
 import com.at.wechair.mapper.ChairsManagementDao;
 import com.at.wechair.service.ChairsManagementService;
 import com.at.wechair.service.LoginService;
+import com.at.wechair.util.TransformChairNumber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
@@ -56,10 +57,9 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     }
 
     @Override
-    public ArrayList<String> getChairStatus(ArrayList<String> list){
-        Object[] params = {};
-        list = chairsDao.getMarks(list,statusSql,params);
-        return list;
+    public HashMap<String,String> getChairStatus(HashMap<String,String> map){
+        map = chairsDao.getMarks(map,statusSql,new Object[]{});
+        return map;
     }
 
     /**
@@ -87,8 +87,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
      * @param seatId 座位号
      * @return boolean
      */
-    public boolean updateStatus(int seatId){
-        Object[] params = {"orange",seatId};
+    public boolean updateStatus(int tableId,int seatId){
+        Object[] params = {"orange",tableId,seatId};
         return chairsDao.updateData(reservationSql,params);
 
     }
@@ -102,11 +102,18 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         int number = (int)chairsDao.selectData(violationSql, params);
         return number == 3;
     }
+
+
     @Override
     public HashMap<String, Object> userReservation(HashMap<String, Object> map){
         String openId = map.get("open_id").toString();
         String sessionKey = map.get("session_key").toString();
-        int chairNumber = (int) map.get("chair_number");
+        String chairNumber = map.get("chairNumber").toString();
+        //转换英文座位号为桌号和座位号
+        int[] chairs = TransformChairNumber.transform(chairNumber);
+        int tableId = chairs[0];
+        int seatId = chairs[1];
+        //判断登录态是否有效
         if(judgeLoginStatus(openId,sessionKey)) {
             //判断用户权限
             if (judgeUserAuthority(map)) {
@@ -117,7 +124,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
                 boolean violationStatus = judgeUserViolationStatus(openId);
                 if (ownNumber == 0 && reservedNumber == 0 && !violationStatus) {
                     //更新数据库座位状态
-                    if (updateStatus(chairNumber)) {
+                    if (updateStatus(tableId,seatId)) {
                         map.put("reservation", "预约成功");
                     } else {
                         map.put("reservation", "数据库操作失败");
