@@ -1,8 +1,7 @@
 package com.at.wechair.service;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -15,11 +14,11 @@ import java.util.Map;
 public interface ChairsManagementService {
     /**
      * 统计剩余座位数量或用户已使用和已预约的座位数
-     * @param param 查询的参数
+     * @param params 查询的参数
      * @param sql sql
      * @return int
      */
-    int getChairsCount(String sql,String param);
+    int getChairsCount(String sql,Object[] params);
 
     /**
      * 获取座位状态
@@ -34,4 +33,18 @@ public interface ChairsManagementService {
      * @return HashMap
      */
     HashMap<String,Object> userReservation(HashMap<String,Object> map);
+
+    /**
+     * 查看用户预约记录
+     * @param map   存储信息的集合
+     * @return HashMap
+     */
+    HashMap<String,Object> reservationList(HashMap<String, Object> map) throws SQLException;
+
+    /**
+     * 取消用户预约记录
+     * @param map map
+     * @return HashMap
+     */
+    HashMap<String,Object> updateReservationList(HashMap<String, Object> map);
 }

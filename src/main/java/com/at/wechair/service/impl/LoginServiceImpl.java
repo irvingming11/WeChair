@@ -32,7 +32,6 @@ import java.util.Map;
 @Service
 public class LoginServiceImpl implements LoginService {
     private static final String OPEN_ID = "open_id";
-    private static final String PIC = "pic";
     private OrdinaryUser user = new OrdinaryUser();
     @Resource
     private LoginDao loginDao;
@@ -40,6 +39,8 @@ public class LoginServiceImpl implements LoginService {
     private String addSql;
     @Value("${login.updateInfoSql}")
     private String updateInfoSql;
+    @Value("${login.updateSessionSql}")
+    private String updateSessionSql;
     @Value("${login.updateImageSql}")
     private String updateImageSql;
     private static final String MAN = "1";
@@ -75,6 +76,7 @@ public class LoginServiceImpl implements LoginService {
 
         try {
             // 调用工具类方法对encryptedData加密数据进行AES解密
+            storageUserInfo(updateSessionSql,new Object[]{map.get(OPEN_ID),map.get("session_key")});
             String string = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
             JSONObject result = new JSONObject(string);
             map = getMap(result,map);
@@ -132,7 +134,8 @@ public class LoginServiceImpl implements LoginService {
 
             System.out.println("性别信息获取异常");
         }
-        boolean result = storageUserInfo(user);
+        Object[] params = {user.getOpenId(),user.getSex(),user.getUserName(),user.getSessionKey(),user.getOwnAuthority()};
+        boolean result = storageUserInfo(addSql,params);
         if (result) {
             System.out.println("数据存储成功");
         } else {
@@ -156,9 +159,8 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public boolean storageUserInfo(OrdinaryUser user) {
-        Object[] params = {user.getOpenId(),user.getSex(),user.getUserName(),user.getSessionKey(),user.getOwnAuthority()};
-        return loginDao.dataOperation(addSql,params);
+    public boolean storageUserInfo(String sql,Object[] params) {
+        return loginDao.dataOperation(sql,params);
     }
 
     @Override

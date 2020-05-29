@@ -44,10 +44,11 @@ public interface LoginService {
 
     /**
      * 存储用户信息
-     * @param user      用户
+     * @param sql   sql
+     * @param params      用户
      * @return boolean
      */
-    boolean storageUserInfo(OrdinaryUser user);
+    boolean storageUserInfo(String sql,Object[] params);
 
     /**
      * 更新用户信息
@@ -62,4 +63,5 @@ public interface LoginService {
      * @return boolean
      */
     boolean updateUserImage(Object[] params);
+
 }

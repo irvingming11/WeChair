@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,20 +75,31 @@ public class ChairsManagementController {
 
     /**
      * 预约查看功能：
-     *        更新预约查看记录状态（待完成）
-     *        记录预约时间（待完成）
+     *        更新预约查看记录状态（已完成）
+     *              查看历史预约(待完成)
+     *        记录预约时间（完成）
      *        预约倒计时（待完成）
      *        取消预约（待完成）：
-     *        用户自动取消预约
-     *        超出预约有效时间
-     *        更新预约状态（待完成）
+     *              用户自动取消预约(已完成)
+     *              超出预约有效时间
+     *        更新预约状态（已完成）
      *        更新取消座位状态（待完成）
      *        更新用户取消预约次数（待完成）
-     *        更新用户黑名单状态（待完成
+     *        更新用户黑名单状态（待完成）
      */
     @RequestMapping(value = "showReservation")
-    public Map<String, Object> showReservation(){
-
-        return null;
+    public Map<String, Object> showReservation(@RequestParam(value = "open_id") String openId,@RequestParam(value = "session_key")String sessionKey) throws SQLException {
+        map.put("open_id", openId);
+        map.put("session_key", sessionKey);
+        map = chairService.reservationList(map);
+        return map;
+    }
+    @RequestMapping(value = "cancelReservation")
+    public Map<String, Object> cancelReservation(@RequestParam(value = "open_id")String openId,
+                                                 @RequestParam(value = "session_key")String sessionKey){
+        map.put("open_id", openId);
+        map.put("session_key", sessionKey);
+        map = chairService.updateReservationList(map);
+        return map;
     }
 }
