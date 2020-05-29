@@ -61,8 +61,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     private ChairsManagementDao chairsDao;
     @Resource
     private LoginService loginService;
-    private static final Date DATE = new Date();
-    private static final Long START_TIME = DATE.getTime();
+    private Long reservationTime;
     /**
      * 普通用户权限
      */
@@ -160,7 +159,10 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
                     //更新数据库座位状态
                     if (updateStatus(openId, tableId, seatId)) {
                         //更新预约表预约记录
-                        String[] times = TimeOuter.stampToDate(START_TIME);
+                        Date DATE = new Date();
+                        Long startTime = DATE.getTime();
+                        setReservationTime(startTime);
+                        String[] times = TimeOuter.stampToDate(startTime);
                         HashMap<String, Object> reservationDate = new HashMap<>(100);
                         reservationDate.put("date", TimeOuter.stringToDate(times[0]));
                         reservationDate.put("time", TimeOuter.stringToTime(times[1]));
@@ -183,17 +185,19 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         return map;
     }
 
+    private void setReservationTime(Long time){
+        this.reservationTime = time;
+    }
     @Override
-    public HashMap<String, Object> reservationList(HashMap<String, Object> map) throws SQLException {
+    public HashMap<String, Object> reservationList(HashMap<String, Object> map) {
         String openId = map.get("open_id").toString();
         String sessionKey = map.get("session_key").toString();
         if (judgeLoginStatus(openId, sessionKey)) {
             //获取当前预约记录
-            Object[] data = chairsDao.getReservationList(selectNowReservationListSql, new Object[]{openId},START_TIME);
-            chairsDao.getReservationList(selectNowReservationListSql, new Object[]{openId},START_TIME);
-            //获取历史预约记录
-            
+            Object[] data = chairsDao.getReservationList(selectNowReservationListSql, new Object[]{openId},reservationTime);
             map.put("appointing", data);
+            //获取历史预约记录
+            map = chairsDao.getOldReservationList(selectOldReservationListSql, new Object[]{openId},map);
         } else {
             map.put("result", 0);
         }

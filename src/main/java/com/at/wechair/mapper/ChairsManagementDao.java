@@ -46,8 +46,16 @@ public interface ChairsManagementDao {
      * @param params   查询对象的集合
      * @param time  时间
      * @return Object[]
-     * @throws SQLException
      */
-    Object[] getReservationList(String sql, Object[] params,Long time) throws SQLException;
+    Object[] getReservationList(String sql, Object[] params,Long time);
+
+    /**
+     * 获取历史预约记录
+     * @param sql   sql
+     * @param params 查询对象的集合
+     * @param map map
+     * @return HashMap
+     */
+    HashMap<String, Object> getOldReservationList(String sql, Object[] params,HashMap<String, Object> map);
 
 }
