@@ -1,5 +1,6 @@
 package com.at.wechair.mapper;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -39,6 +40,14 @@ public interface ChairsManagementDao {
      */
     HashMap<String,Object> getMarks(HashMap<String,Object> map, String sql, Object[] params);
 
-
+    /**
+     * 获取预约记录
+     * @param sql   sql
+     * @param params   查询对象的集合
+     * @param time  时间
+     * @return Object[]
+     * @throws SQLException
+     */
+    Object[] getReservationList(String sql, Object[] params,Long time) throws SQLException;
 
 }
