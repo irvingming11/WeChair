@@ -80,6 +80,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     private String updateReservationChairSql;
     @Value("${chairs.insertUsingSql}")
     private String insertUsingSql;
+    @Value("${chairs.selectAllChairsTimeSql}")
+    private String allChairsTimeSql;
     @Resource
     private ChairsManagementDao chairsDao;
     @Resource
@@ -102,6 +104,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
 
     @Override
     public HashMap<String, Object> getChairStatus(HashMap<String, Object> map) {
+        //获取所有被预约座位的时间
+        chairsDao.releaseOutTimeChairs(allChairsTimeSql,new Object[]{0});
         map = chairsDao.getMarks(map, statusSql, new Object[]{});
         return map;
     }
@@ -187,7 +191,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
             //判断用户权限
             if (judgeUserAuthority(map)) {
                 //获取用户正使用的座位数量
-                int ownNumber = getChairsCount(ownChairSql, new Object[]{openId});
+                int ownNumber = getChairsCount(ownChairSql, new Object[]{openId,"red"});
                 //获取用户已预约的座位数量
                 int reservedNumber = getChairsCount(reservationChairSql, new Object[]{openId, 0});
                 boolean violationStatus = judgeUserViolationStatus(openId);

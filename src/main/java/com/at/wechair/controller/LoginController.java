@@ -85,7 +85,8 @@ public class LoginController {
         String fileName = file.getOriginalFilename();
         String newFileName = FileUtil.uploadImage(file, localPath, fileName);
         map.put("pic",newFileName);
-        if (newFileName != null && loginService.updateUserImage(new String[]{newFileName, (String) map.get("open_id")})) {
+        String openId = map.get("open_id").toString();
+        if (newFileName != null && loginService.updateUserImage(newFileName,openId)) {
             map.put("status", 1);
             map.put("msg", "上传成功");
         } else {

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -40,6 +42,31 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
         return super.executeUpdate(sql, params) != 0;
     }
 
+    @Override
+    public void releaseOutTimeChairs(String sql, Object[] params){
+        try{
+            ResultSet rs = super.executeQuery(sql, params);
+            while(rs.next()) {
+                String time = rs.getObject(1).toString();
+                String tableId = rs.getObject(2).toString();
+                String seatId = rs.getObject(3).toString();
+                Time aimTime = TimeOuter.stringToTime(time);
+                Long times = TimeOuter.stampToDate(time);
+                Date date = new Date();
+                Long now = date.getTime();
+                Date aimDay = TimeOuter.stringToDate(TimeOuter.stampToDate(now)[0]);
+                if(times + 1000 * 60 * 30 < now) {
+                    updateData("update Seat set Mark = ?,UserID = ? where TableID = ? and SeatID = ?",new Object[]{"green","",tableId,seatId});
+                    updateData("update Reservation Mark = ? where AimTime = ? and AimDay = ? ",new Object[]{3,aimTime,aimDay});
+                }
+            }
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        //更新座位状态
+
+        //更新预约记录状态为违规
+    }
     @Override
     public HashMap<String, Object> getMarks(HashMap<String, Object> map, String sql, Object[] params) {
         ResultSet rs = super.executeQuery(sql, params);

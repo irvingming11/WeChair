@@ -17,12 +17,7 @@ import java.util.HashMap;
 
 
 public interface LoginService {
-//    /**
-//     * 判断用户是否是首次登陆，即查询用户是否在数据库中
-//     * @param map  用户信息
-//     * @return  boolean
-//     */
-//    boolean findOneUser(HashMap<String,Object> map);
+
     /**
      * 获取用户权限
      * @param openId  用户的openId
@@ -50,18 +45,19 @@ public interface LoginService {
      */
     boolean storageUserInfo(String sql,Object[] params);
 
-    /**
-     * 更新用户信息
-     * @param params    用户更新信息集合
-     * @return  boolean
-     */
-    boolean updateUserInfo(Object[] params);
+//    /**
+//     * 更新用户信息
+//     * @param params 集合
+//     * @return  boolean
+//     */
+//    boolean updateUserInfo(Object[] params);
 
     /**
      * 更新上传的图片名到数据库
-     * @param params   数据库操作对象
+     * @param fileName   文件名
+     * @param openId 用户open_id
      * @return boolean
      */
-    boolean updateUserImage(Object[] params);
+    boolean updateUserImage(String fileName,String openId);
 
 }
