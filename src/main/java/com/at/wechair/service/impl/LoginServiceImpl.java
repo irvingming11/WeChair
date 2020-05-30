@@ -12,6 +12,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +36,10 @@ public class LoginServiceImpl implements LoginService {
     private OrdinaryUser user = new OrdinaryUser();
     @Resource
     private LoginDao loginDao;
-    @Value("${login.addSql}")
-    private String addSql;
+    @Value("${login.updateSql}")
+    private String updateSql;
+    @Value("${login.insertSessionSql}")
+    private String insertSessionSql;
     @Value("${login.updateInfoSql}")
     private String updateInfoSql;
     @Value("${login.updateSessionSql}")
@@ -45,17 +48,11 @@ public class LoginServiceImpl implements LoginService {
     private String updateImageSql;
     private static final String MAN = "1";
     private static final String WOMAN = "0";
-    @Override
-    public boolean findOneUser(HashMap<String,Object> map) {
-        String userId = loginDao.getUserInfo(map).getOpenId();
-        if(userId == null){
-            return false;
-        }
-        return userId.equals(map.get(OPEN_ID));
-    }
+
+
 
     @Override
-    public HashMap<String,Object> getUserAuthorities(String openId,HashMap<String,Object> map) {
+    public HashMap<String, Object> getUserAuthorities(String openId, HashMap<String, Object> map) {
         OrdinaryUser user = loginDao.getUserInfo(map);
         try {
             map.put("ownAuthority", user.getOwnAuthority());
@@ -66,33 +63,34 @@ public class LoginServiceImpl implements LoginService {
                 map.put("status", 0);
                 map.put("msg", "获取用户权限失败");
             }
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
         return map;
     }
+
     @Override
-    public HashMap<String, Object> decryptUserInfo(String encryptedData, String sessionKey,String iv,HashMap<String, Object> map) {
+    public HashMap<String, Object> decryptUserInfo(String encryptedData, String sessionKey, String iv, HashMap<String, Object> map) {
 
         try {
             // 调用工具类方法对encryptedData加密数据进行AES解密
-            storageUserInfo(updateSessionSql,new Object[]{map.get(OPEN_ID),map.get("session_key")});
+            if (loginDao.getUserInfo(map) == null) {
+                System.out.println("执行");
+                storageUserInfo(insertSessionSql, new Object[]{map.get(OPEN_ID), map.get("session_key")});
+            } else {
+                storageUserInfo(updateSessionSql, new Object[]{map.get("session_key"),map.get(OPEN_ID)});
+            }
             String string = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
             JSONObject result = new JSONObject(string);
-            map = getMap(result,map);
-            if (findOneUser(map)) {
-                //存在的用户更新用户数据
-                dealWithInfo(map.get(OPEN_ID), (String) map.get("session_key"), map.get("nickName"));
-            } else {
-                //不存在的用户将数据存储到数据库中
-                dealWithInfo(map);
-            }
+            map = getMap(result, map);
+            dealWithInfo(map);
             return map;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return  map;
+        return map;
     }
+
     /**
      * 存储解密数据
      *
@@ -117,9 +115,11 @@ public class LoginServiceImpl implements LoginService {
         }
         return map;
     }
+
     /**
      * 首次登陆用户解密的用户信息插入数据库
-     * @param map   存储数据的map容器
+     *
+     * @param map 存储数据的map容器
      */
     public void dealWithInfo(Map<String, Object> map) {
         user.setOpenId((String) map.get("open_id"));
@@ -134,8 +134,8 @@ public class LoginServiceImpl implements LoginService {
 
             System.out.println("性别信息获取异常");
         }
-        Object[] params = {user.getOpenId(),user.getSex(),user.getUserName(),user.getSessionKey(),user.getOwnAuthority()};
-        boolean result = storageUserInfo(addSql,params);
+        Object[] params = {user.getSex(), user.getUserName(), user.getSessionKey(), user.getOwnAuthority(), user.getOpenId()};
+        boolean result = storageUserInfo(updateSql, params);
         if (result) {
             System.out.println("数据存储成功");
         } else {
@@ -143,35 +143,36 @@ public class LoginServiceImpl implements LoginService {
         }
     }
 
-    /**
-     * 对数据库中存在的用户的session_key和用户名等信息进行更新
-     * @param openId        用户的open_id
-     * @param sessionKey    用户的session_key
-     * @param userName      用户名
-     */
-    public void dealWithInfo(Object openId, String sessionKey, Object userName){
-        Object[] params = {sessionKey,userName.toString(),openId.toString()};
-        if(updateUserInfo(params)){
-            System.out.println("用户信息更新成功");
-        }else{
-            System.out.println("用户信息更新失败");
-        }
-    }
+//    /**
+//     * 对数据库中存在的用户的session_key和用户名等信息进行更新
+//     *
+//     * @param openId     用户的open_id
+//     * @param sessionKey 用户的session_key
+//     * @param userName   用户名
+//     */
+//    public void dealWithInfo(Object openId, String sessionKey, Object userName) {
+//        Object[] params = {sessionKey, userName.toString(), openId.toString()};
+//        if (updateUserInfo(params)) {
+//            System.out.println("用户信息更新成功");
+//        } else {
+//            System.out.println("用户信息更新失败");
+//        }
+//    }
 
     @Override
-    public boolean storageUserInfo(String sql,Object[] params) {
-        return loginDao.dataOperation(sql,params);
+    public boolean storageUserInfo(String sql, Object[] params) {
+        return loginDao.dataOperation(sql, params);
     }
 
     @Override
     public boolean updateUserInfo(Object[] params) {
-        return loginDao.dataOperation(updateInfoSql,params);
+        return loginDao.dataOperation(updateInfoSql, params);
 
     }
 
     @Override
     public boolean updateUserImage(Object[] params) {
-        return loginDao.dataOperation(updateImageSql,params);
+        return loginDao.dataOperation(updateImageSql, params);
     }
 
 

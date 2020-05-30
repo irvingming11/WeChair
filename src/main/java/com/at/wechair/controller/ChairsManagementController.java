@@ -1,6 +1,7 @@
 package com.at.wechair.controller;
 
 import com.at.wechair.service.ChairsManagementService;
+import com.at.wechair.util.TransformChairNumber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -119,4 +120,34 @@ public class ChairsManagementController {
         return map;
 
     }
+    @RequestMapping(value = "scanChair")
+    public Map<String, Object> scanChair(@RequestParam(value = "open_id") String openId,
+                                         @RequestParam(value = "session_key")String sessionKey,
+                                         @RequestParam(value = "seat_num")String number){
+        map.put("open_id", openId);
+        map.put("session_key", sessionKey);
+        int[] numbers = TransformChairNumber.transform(number);
+        int tableId = numbers[0];
+        int seatId = numbers[1];
+        map.put("tableId", tableId);
+        map.put("seatId", seatId);
+        map = chairService.scan(map);
+        return map;
+    }
+    @RequestMapping(value = "conformUsing")
+    public Map<String, Object> conformUsing(@RequestParam(value = "open_id") String openId,
+                                            @RequestParam(value = "session_key")String sessionKey,
+                                            @RequestParam(value = "seat_num")String number){
+
+        map.put("open_id", openId);
+        map.put("session_key", sessionKey);
+        int[] numbers = TransformChairNumber.transform(number);
+        int tableId = numbers[0];
+        int seatId = numbers[1];
+        map.put("tableId", tableId);
+        map.put("seatId", seatId);
+        map = chairService.usingChair(map);
+        return map;
+    }
+
 }

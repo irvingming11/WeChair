@@ -17,19 +17,19 @@ import java.util.HashMap;
  */
 
 @Repository
-public class LoginDaoImpl extends BaseDao implements LoginDao{
+public class LoginDaoImpl extends BaseDao implements LoginDao {
     //受影响行数
 
     private int operatedResult = 0;
 
 
     @Override
-    public boolean dataOperation(String sql,Object[] params) {
-        try{
-            operatedResult  = super.executeUpdate(sql,params);
-        }catch (Exception e){
+    public boolean dataOperation(String sql, Object[] params) {
+        try {
+            operatedResult = super.executeUpdate(sql, params);
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally{
+        } finally {
             super.closeResource();
         }
         return operatedResult > 0;
@@ -37,32 +37,33 @@ public class LoginDaoImpl extends BaseDao implements LoginDao{
 
 
 
+
     @Override
-    public OrdinaryUser getUserInfo(HashMap<String,Object> map) {
+    public OrdinaryUser getUserInfo(HashMap<String, Object> map) {
         String sql = "select * from Student where UserID = ?";
         Object[] params = {map.get("open_id")};
-        ResultSet rs = super.executeQuery(sql,params);
-        OrdinaryUser user = null;
-        if(rs == null){
-            return null;
-        }else {
-            try {
-                user = new OrdinaryUser();
-                while(rs.next()) {
-                    String openId = rs.getString("UserID");
-                    String sessionKey = rs.getString("Password");
-                    int ownAuthority = rs.getInt("warrant");
-                    user.setOpenId(openId);
-                    user.setSessionKey(sessionKey);
-                    user.setOwnAuthority(ownAuthority);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                super.closeResource();
+        ResultSet rs = super.executeQuery(sql, params);
+        OrdinaryUser user;
+        try {
+            user = new OrdinaryUser();
+            while (rs.next()) {
+                String openId = rs.getString("UserID");
+                String sessionKey = rs.getString("Password");
+                int ownAuthority = rs.getInt("warrant");
+                user.setOpenId(openId);
+                user.setSessionKey(sessionKey);
+                user.setOwnAuthority(ownAuthority);
             }
-            return user;
+            if(user.getOpenId() == null){
+                return null;
+            }else{
+                return user;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            super.closeResource();
         }
+        return null;
     }
-
 }
