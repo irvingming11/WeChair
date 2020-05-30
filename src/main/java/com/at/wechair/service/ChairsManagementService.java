@@ -61,4 +61,18 @@ public interface ChairsManagementService {
      * @return HashMap
      */
     HashMap<String,Object> updateLeavingStatus(HashMap<String, Object> map);
+
+    /**
+     * 扫码用座
+     * @param map map
+     * @return HashMap
+     */
+    HashMap<String, Object> scan(HashMap<String, Object> map);
+
+    /**
+     * 确认使用
+     * @param map map
+     * @return HashMap
+     */
+    HashMap<String, Object> usingChair(HashMap<String, Object> map);
 }

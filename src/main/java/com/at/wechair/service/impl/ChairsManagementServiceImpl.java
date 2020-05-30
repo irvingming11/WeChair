@@ -60,16 +60,26 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     private String updateSeatSql;
     @Value("${chairs.selectUsingNumberSql}")
     private String usingNumberSql;
-    @Value("${chairs.selectNowUsingSql}")
-    private String nowUsingSql;
-    @Value("${chairs.selectOldUsingSql}")
-    private String oldUsingSql;
+    @Value("${chairs.selectUsingSql}")
+    private String usingSql;
     @Value("${chairs.updateLeavingSql}")
     private String updateLeavingSql;
     @Value("${chairs.insertUsingListSql}")
     private String usingListSql;
     @Value("${chairs.updateReservationChairsLeavingSql}")
     private String reservationChairLeavingSql;
+    @Value("${chairs.selectChairMarkSql}")
+    private String chairMarkSql;
+    @Value("${chairs.selectReservationChairTableSql}")
+    private String reservationChairTableSql;
+    @Value("${chairs.selectReservationChairSeatSql}")
+    private String reservationChairSeatSql;
+    @Value("${chairs.updateChairStatusSql}")
+    private String updateChairStatusSql;
+    @Value("${chairs.updateReservationChairStatusSql}")
+    private String updateReservationChairSql;
+    @Value("${chairs.insertUsingSql}")
+    private String insertUsingSql;
     @Resource
     private ChairsManagementDao chairsDao;
     @Resource
@@ -78,6 +88,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
      * 普通用户权限
      */
     private static final int OU_AUTHORITY = 400;
+    private static final String MARK = "green";
 
     @Override
     public int getChairsCount(String sql, Object[] params) {
@@ -120,9 +131,10 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
 
     /**
      * 更新预约座位状态
-     * @param openId user's open_id
+     *
+     * @param openId  user's open_id
      * @param tableId 桌号
-     * @param seatId 座位号
+     * @param seatId  座位号
      * @return boolean
      */
     public boolean updateStatus(String openId, int tableId, int seatId) {
@@ -133,13 +145,15 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
 
     /**
      * 更新离座状态
+     *
      * @param openId 用户open_id
      * @return boolean
      */
-    public boolean updateStatus(String openId) {
-        Object[] params = {"green",openId};
+    public boolean updateStatus(String openId,String mark, int tableId, int seatId) {
+        Object[] params = {mark, openId,tableId,seatId};
         return chairsDao.updateData(updateLeavingSql, params);
     }
+
     /**
      * 判断用户违规状态
      *
@@ -149,7 +163,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     public boolean judgeUserViolationStatus(String openId) {
         Date date = new Date();
         Long time = date.getTime();
-        Object[] params = {openId,TimeOuter.stampToDate(time)[0]};
+        Object[] params = {openId, TimeOuter.stampToDate(time)[0]};
         Object result = chairsDao.selectData(violationSql, params);
         if (result == null) {
             return false;
@@ -175,7 +189,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
                 //获取用户正使用的座位数量
                 int ownNumber = getChairsCount(ownChairSql, new Object[]{openId});
                 //获取用户已预约的座位数量
-                int reservedNumber = getChairsCount(reservationChairSql, new Object[]{openId,0});
+                int reservedNumber = getChairsCount(reservationChairSql, new Object[]{openId, 0});
                 boolean violationStatus = judgeUserViolationStatus(openId);
                 if (ownNumber == 0 && reservedNumber == 0 && !violationStatus) {
                     //更新数据库座位状态
@@ -187,7 +201,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
                         HashMap<String, Object> reservationDate = new HashMap<>(100);
                         reservationDate.put("date", TimeOuter.stringToDate(times[0]));
                         reservationDate.put("time", TimeOuter.stringToTime(times[1]));
-                        Object[] params = new Object[]{openId, reservationDate.get("date"), reservationDate.get("time"), 0,"北书库",tableId, seatId};
+                        Object[] params = new Object[]{openId, reservationDate.get("date"), reservationDate.get("time"), 0, "北书库", tableId, seatId};
                         chairsDao.updateData(insertReservationSql, params);
                         map.put("result", 1);
                     } else {
@@ -205,6 +219,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         }
         return map;
     }
+
     @Override
     public HashMap<String, Object> reservationList(HashMap<String, Object> map) {
         String openId = map.get("open_id").toString();
@@ -213,15 +228,15 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
             //获取当前预约记录
             Object obj = chairsDao.selectData(reservationTimeSql, new Object[]{openId});
             Object[] data;
-            if(obj != null) {
+            if (obj != null) {
                 Long reservationTime = TimeOuter.stampToDate(obj.toString());
                 data = chairsDao.getReservationList(selectNowReservationListSql, new Object[]{openId}, reservationTime);
-            }else{
+            } else {
                 data = new Object[]{};
             }
             map.put("appointing", data);
             //获取历史预约记录
-            map = chairsDao.getOldReservationList(selectOldReservationListSql, new Object[]{openId},map);
+            map = chairsDao.getOldReservationList(selectOldReservationListSql, new Object[]{openId}, map);
         } else {
             map.put("result", 0);
         }
@@ -233,52 +248,117 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         String openId = map.get("open_id").toString();
         String sessionKey = map.get("session_key").toString();
         if (judgeLoginStatus(openId, sessionKey)) {
+            int tableId = (int) chairsDao.selectData(tableIdSql, new Object[]{openId, 0});
+            int seatId = (int) chairsDao.selectData(seatIdSql, new Object[]{openId,0});
             chairsDao.updateData(cancelReservationSql, new Object[]{2, openId});
-            int tableId = (int) chairsDao.selectData(tableIdSql, new Object[]{openId});
-            int seatId = (int) chairsDao.selectData(seatIdSql, new Object[]{openId});
-            chairsDao.updateData(updateSeatSql, new Object[]{"green","",tableId,seatId});
-            map.put("result",1);
+            chairsDao.updateData(updateSeatSql, new Object[]{"green", "", tableId, seatId});
+            map.put("result", 1);
         } else {
-            System.out.println("执行");
             map.put("result", 0);
         }
         return map;
     }
 
     @Override
-    public HashMap<String, Object> usingList(HashMap<String, Object> map){
+    public HashMap<String, Object> usingList(HashMap<String, Object> map) {
         String openId = map.get("open_id").toString();
         String sessionKey = map.get("session_key").toString();
         if (judgeLoginStatus(openId, sessionKey)) {
             //获取当前使用记录
-            Object obj = chairsDao.selectData(usingNumberSql, new Object[]{openId,1});
+            Object obj = chairsDao.selectData(usingNumberSql, new Object[]{openId, "red"});
             Object[] data;
-            if(obj != null) {
-                data = chairsDao.getUsingList(nowUsingSql, new Object[]{openId,1});
-            }else{
+            if (obj != null) {
+                data = chairsDao.getUsingList(usingSql, new Object[]{openId});
+            } else {
                 data = new Object[]{};
             }
+            map = chairsDao.getOldUsingList(usingSql, new Object[]{openId}, map);
             map.put("using", data);
             //获取历史使用记录
-            map = chairsDao.getOldUsingList(oldUsingSql, new Object[]{openId},map);
+
+        } else {
+            map.put("result", 0);
+        }
+        return map;
+    }
+
+    @Override
+    public HashMap<String, Object> updateLeavingStatus(HashMap<String, Object> map) {
+        String openId = map.get("open_id").toString();
+        int tableId = (int) chairsDao.selectData("select TableID from Seat where UserID = ?", new Object[]{openId});
+        int seatId = (int) chairsDao.selectData("select SeatID from Seat where UserID = ?", new Object[]{openId});
+        if (updateStatus("",MARK,tableId,seatId)) {
+            chairsDao.updateData(usingListSql, new Object[]{openId, "北书库", seatId, tableId});
+            chairsDao.updateData(reservationChairLeavingSql, new Object[]{4, openId, tableId, seatId});
+            map.put("status", 1);
+        } else {
+            map.put("status", 0);
+        }
+        return map;
+    }
+
+    @Override
+    public HashMap<String, Object> scan(HashMap<String, Object> map) {
+        String openId = map.get("open_id").toString();
+        String sessionKey = map.get("session_key").toString();
+        int tableId = Integer.parseInt(map.get("tableId").toString());
+        int seatId = Integer.parseInt(map.get("seatId").toString());
+        if (judgeLoginStatus(openId, sessionKey)) {
+            //获取用户正使用的座位数量
+            int ownNumber = getChairsCount(ownChairSql, new Object[]{openId,"red"});
+            //获取用户已预约的座位数量
+            int reservedNumber = getChairsCount(reservationChairSql, new Object[]{openId, 0});
+            if(ownNumber == 0){
+                if(reservedNumber == 0){
+                    //判断当前座位是否空闲
+                    String mark = chairsDao.selectData(chairMarkSql,new Object[]{tableId,seatId}).toString();
+                    System.out.println();
+                    if(MARK.equals(mark)){
+                        map.put("status",2);
+                    }else{
+                        map.put("status",3);
+                    }
+                }else if(reservedNumber == 1){
+                    //判断当前座位是否为自己预约的座位
+                    int reservedTableNumber = Integer.parseInt(chairsDao.selectData(reservationChairTableSql,new Object[]{openId}).toString());
+                    int reservedSeatNumber = Integer.parseInt(chairsDao.selectData(reservationChairSeatSql,new Object[]{openId}).toString());
+                    System.out.println(reservedSeatNumber);
+                    System.out.println(seatId);
+                    if(reservedTableNumber == tableId && reservedSeatNumber == seatId){
+                        //更新座位状态、更新预约状态
+                        chairsDao.updateData(updateChairStatusSql,new Object[]{"red",openId,tableId,seatId});
+                        chairsDao.updateData(updateReservationChairSql,new Object[]{1,openId,tableId,seatId});
+                        chairsDao.updateData(insertUsingSql,new Object[]{openId,"北书库", seatId, tableId});
+                        map.put("status",1);
+                    }else{
+                        map.put("status",4);
+                    }
+                }else{
+                    map.put("status",5);
+                }
+            }else{
+                map.put("status",4);
+            }
         } else {
             map.put("result", 0);
         }
         return map;
     }
     @Override
-    public HashMap<String,Object> updateLeavingStatus(HashMap<String, Object> map){
+    public HashMap<String, Object> usingChair(HashMap<String, Object> map){
         String openId = map.get("open_id").toString();
-        int tableId = (int) chairsDao.selectData("select TableID from Seat where UserID = ?",new Object[]{openId});
-        int seatId = (int) chairsDao.selectData("select SeatID from Seat where UserID = ?",new Object[]{openId});
-        if(updateStatus(openId)){
-            chairsDao.updateData(usingListSql, new Object[]{openId,"北书库",seatId,tableId});
-            chairsDao.updateData(reservationChairLeavingSql, new Object[]{4,openId,tableId,seatId});
-            map.put("status",1);
+        String sessionKey = map.get("session_key").toString();
+        int tableId = Integer.parseInt(map.get("tableId").toString());
+        int seatId = Integer.parseInt(map.get("seatId").toString());
+        if(judgeLoginStatus(openId, sessionKey)) {
+            //更新座位状态
+            chairsDao.updateData(updateChairStatusSql, new Object[]{"red", openId, tableId, seatId});
+            //更新使用表
+            chairsDao.updateData(insertUsingSql, new Object[]{openId, "北书库", seatId, tableId});
+            map.put("result", 1);
         }else{
-            map.put("status",0);
+            map.put("result", 0);
         }
         return map;
     }
-
 }

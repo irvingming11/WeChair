@@ -90,7 +90,7 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
     public HashMap<String, Object> getOldReservationList(String sql, Object[] params, HashMap<String, Object> map) {
         try {
             int number = 0;
-            super.executeQuery("select Count(*) from Reservation where UserID = ? and Mark  in (2,3) group by UserID", params);
+            super.executeQuery("select Count(*) from Reservation where UserID = ? and Mark in (2,3) group by UserID", params);
             while (rs.next()) {
                 number = rs.getInt(1);
             }
@@ -159,8 +159,9 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
                 int seatId = rs.getInt("SeatID");
                 String number = tableId + "桌" + seatId + "座";
                 data[2] = number;
-                data[3] = rs.getObject("AimDay");
+                data[3] = rs.getObject("Day");
             }
+            System.out.println("执行");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -174,7 +175,6 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
             while (rs.next()) {
                 number = rs.getInt(1);
             }
-
             String[] results = new String[]{"room_name", "status", "seat", "date"};
             String result = "";
             for (int i = 0; i < results.length; i++) {

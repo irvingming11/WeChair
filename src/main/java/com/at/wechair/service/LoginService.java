@@ -17,12 +17,12 @@ import java.util.HashMap;
 
 
 public interface LoginService {
-    /**
-     * 判断用户是否是首次登陆，即查询用户是否在数据库中
-     * @param map  用户信息
-     * @return  boolean
-     */
-    boolean findOneUser(HashMap<String,Object> map);
+//    /**
+//     * 判断用户是否是首次登陆，即查询用户是否在数据库中
+//     * @param map  用户信息
+//     * @return  boolean
+//     */
+//    boolean findOneUser(HashMap<String,Object> map);
     /**
      * 获取用户权限
      * @param openId  用户的openId
