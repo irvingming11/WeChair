@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -47,6 +48,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     private String insertReservationSql;
     @Value("${chairs.selectNowReservationListSql}")
     private String selectNowReservationListSql;
+    @Value("${chairs.selectReservationTimeSql}")
+    private String reservationTimeSql;
     @Value("${chairs.selectOldReservationListSql}")
     private String selectOldReservationListSql;
     @Value("${chairs.cancelReservationListSql}")
@@ -61,7 +64,6 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     private ChairsManagementDao chairsDao;
     @Resource
     private LoginService loginService;
-    private Long reservationTime;
     /**
      * 普通用户权限
      */
@@ -132,7 +134,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         if (result == null) {
             return false;
         } else {
-            return Integer.parseInt(result.toString()) == 3;
+            return Integer.parseInt(result.toString()) >= 3;
         }
     }
 
@@ -159,9 +161,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
                     //更新数据库座位状态
                     if (updateStatus(openId, tableId, seatId)) {
                         //更新预约表预约记录
-                        Date DATE = new Date();
-                        Long startTime = DATE.getTime();
-                        setReservationTime(startTime);
+                        Date date = new Date();
+                        Long startTime = date.getTime();
                         String[] times = TimeOuter.stampToDate(startTime);
                         HashMap<String, Object> reservationDate = new HashMap<>(100);
                         reservationDate.put("date", TimeOuter.stringToDate(times[0]));
@@ -184,17 +185,20 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         }
         return map;
     }
-
-    private void setReservationTime(Long time){
-        this.reservationTime = time;
-    }
     @Override
     public HashMap<String, Object> reservationList(HashMap<String, Object> map) {
         String openId = map.get("open_id").toString();
         String sessionKey = map.get("session_key").toString();
         if (judgeLoginStatus(openId, sessionKey)) {
             //获取当前预约记录
-            Object[] data = chairsDao.getReservationList(selectNowReservationListSql, new Object[]{openId},reservationTime);
+            Object obj = chairsDao.selectData(reservationTimeSql, new Object[]{openId});
+            Object[] data;
+            if(obj != null) {
+                Long reservationTime = TimeOuter.stampToDate(obj.toString());
+                data = chairsDao.getReservationList(selectNowReservationListSql, new Object[]{openId}, reservationTime);
+            }else{
+                data = new Object[]{};
+            }
             map.put("appointing", data);
             //获取历史预约记录
             map = chairsDao.getOldReservationList(selectOldReservationListSql, new Object[]{openId},map);
@@ -215,6 +219,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
             chairsDao.updateData(updateSeatSql, new Object[]{"green","",tableId,seatId});
             map.put("result",1);
         } else {
+            System.out.println("执行");
             map.put("result", 0);
         }
         return map;
