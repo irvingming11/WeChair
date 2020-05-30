@@ -31,6 +31,13 @@ public interface ChairsManagementDao {
      * @return boolean
      */
     boolean updateData(String sql, Object[] params);
+
+    /**
+     * 释放超时的椅子
+     * @param sql sql
+     * @param params params
+     */
+    void releaseOutTimeChairs(String sql, Object[] params);
     /**
      * 从数据库获取每个座位的状态
      * @param map 存储座位状态的集合

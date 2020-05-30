@@ -46,6 +46,8 @@ public class LoginServiceImpl implements LoginService {
     private String updateSessionSql;
     @Value("${login.updateImageSql}")
     private String updateImageSql;
+    @Value("${login.updateAuthSql}")
+    private String updateAuthSql;
     private static final String MAN = "1";
     private static final String WOMAN = "0";
 
@@ -75,8 +77,7 @@ public class LoginServiceImpl implements LoginService {
         try {
             // 调用工具类方法对encryptedData加密数据进行AES解密
             if (loginDao.getUserInfo(map) == null) {
-                System.out.println("执行");
-                storageUserInfo(insertSessionSql, new Object[]{map.get(OPEN_ID), map.get("session_key")});
+                storageUserInfo(insertSessionSql, new Object[]{map.get(OPEN_ID), map.get("session_key"),400});
             } else {
                 storageUserInfo(updateSessionSql, new Object[]{map.get("session_key"),map.get(OPEN_ID)});
             }
@@ -134,7 +135,7 @@ public class LoginServiceImpl implements LoginService {
 
             System.out.println("性别信息获取异常");
         }
-        Object[] params = {user.getSex(), user.getUserName(), user.getSessionKey(), user.getOwnAuthority(), user.getOpenId()};
+        Object[] params = {user.getSex(), user.getUserName(), user.getSessionKey(), user.getOpenId()};
         boolean result = storageUserInfo(updateSql, params);
         if (result) {
             System.out.println("数据存储成功");
@@ -142,36 +143,21 @@ public class LoginServiceImpl implements LoginService {
             System.out.println("数据存储失败");
         }
     }
-
-//    /**
-//     * 对数据库中存在的用户的session_key和用户名等信息进行更新
-//     *
-//     * @param openId     用户的open_id
-//     * @param sessionKey 用户的session_key
-//     * @param userName   用户名
-//     */
-//    public void dealWithInfo(Object openId, String sessionKey, Object userName) {
-//        Object[] params = {sessionKey, userName.toString(), openId.toString()};
-//        if (updateUserInfo(params)) {
-//            System.out.println("用户信息更新成功");
-//        } else {
-//            System.out.println("用户信息更新失败");
-//        }
-//    }
-
     @Override
     public boolean storageUserInfo(String sql, Object[] params) {
         return loginDao.dataOperation(sql, params);
     }
 
-    @Override
-    public boolean updateUserInfo(Object[] params) {
-        return loginDao.dataOperation(updateInfoSql, params);
+//    @Override
+//    public boolean updateUserInfo(Object[] params) {
+//        return loginDao.dataOperation(updateInfoSql, params);
+//
+//    }
 
-    }
-
     @Override
-    public boolean updateUserImage(Object[] params) {
+    public boolean updateUserImage(String fileName,String openId) {
+        Object[] params = {fileName,openId};
+        storageUserInfo(updateAuthSql,new Object[]{500,openId});
         return loginDao.dataOperation(updateImageSql, params);
     }
 
