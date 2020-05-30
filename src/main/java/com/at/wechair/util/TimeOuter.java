@@ -1,5 +1,6 @@
 package com.at.wechair.util;
 
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,34 +17,29 @@ public class TimeOuter {
 
 
 
-//    public  TimeOuter(Long time, String s) {
-//        System.out.println("执行");
-//        midTime = stampToDate(time);
-//        while (midTime > 0) {
-//            midTime--;
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        if(midTime == 0){
-//
-//        }
-//    }
+
 
 
     /**
-     * 获取剩余时间戳
+     * 时间戳转换成时间
      *
      * @return Long
      */
     public static String[] stampToDate(Long time) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println(simpleDateFormat.format(time));
         return simpleDateFormat.format(time).split(" ");
     }
 
+    public static Long stampToDate(String date)  {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+            Date result = simpleDateFormat.parse(date);
+            return result.getTime();
+        }catch(ParseException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /**
      * 将字符串转换成Date类型
@@ -63,18 +59,11 @@ public class TimeOuter {
 
     /**
      * 将字符串转化成time类型
-     *
      * @param time 时间
      * @return Time
      */
-    public static Date stringToTime(String time) {
-        SimpleDateFormat ft = new SimpleDateFormat("HH:mm:ss");
-        try {
-            return ft.parse(time);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static Time stringToTime(String time) {
+        return Time.valueOf(time);
     }
 
     /**
@@ -99,7 +88,7 @@ public class TimeOuter {
         return nowTimes;
     }
 
-    private static int[] stringToInteger(String[] param) {
+    public static int[] stringToInteger(String[] param) {
         int[] result = new int[3];
         for (int i = 0; i < param.length; i++) {
             result[i] = Integer.parseInt(param[i]);

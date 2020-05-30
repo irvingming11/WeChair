@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -47,6 +46,8 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     private String insertReservationSql;
     @Value("${chairs.selectNowReservationListSql}")
     private String selectNowReservationListSql;
+    @Value("${chairs.selectReservationTimeSql}")
+    private String reservationTimeSql;
     @Value("${chairs.selectOldReservationListSql}")
     private String selectOldReservationListSql;
     @Value("${chairs.cancelReservationListSql}")
@@ -57,11 +58,22 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     private String seatIdSql;
     @Value("${chairs.updateCancelSeatSql}")
     private String updateSeatSql;
+    @Value("${chairs.selectUsingNumberSql}")
+    private String usingNumberSql;
+    @Value("${chairs.selectNowUsingSql}")
+    private String nowUsingSql;
+    @Value("${chairs.selectOldUsingSql}")
+    private String oldUsingSql;
+    @Value("${chairs.updateLeavingSql}")
+    private String updateLeavingSql;
+    @Value("${chairs.insertUsingListSql}")
+    private String usingListSql;
+    @Value("${chairs.updateReservationChairsLeavingSql}")
+    private String reservationChairLeavingSql;
     @Resource
     private ChairsManagementDao chairsDao;
     @Resource
     private LoginService loginService;
-    private Long reservationTime;
     /**
      * 普通用户权限
      */
@@ -107,8 +119,9 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
     }
 
     /**
-     * 更新座位状态
-     *
+     * 更新预约座位状态
+     * @param openId user's open_id
+     * @param tableId 桌号
      * @param seatId 座位号
      * @return boolean
      */
@@ -118,6 +131,15 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
 
     }
 
+    /**
+     * 更新离座状态
+     * @param openId 用户open_id
+     * @return boolean
+     */
+    public boolean updateStatus(String openId) {
+        Object[] params = {"green",openId};
+        return chairsDao.updateData(updateLeavingSql, params);
+    }
     /**
      * 判断用户违规状态
      *
@@ -132,7 +154,7 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         if (result == null) {
             return false;
         } else {
-            return Integer.parseInt(result.toString()) == 3;
+            return Integer.parseInt(result.toString()) >= 3;
         }
     }
 
@@ -159,14 +181,13 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
                     //更新数据库座位状态
                     if (updateStatus(openId, tableId, seatId)) {
                         //更新预约表预约记录
-                        Date DATE = new Date();
-                        Long startTime = DATE.getTime();
-                        setReservationTime(startTime);
+                        Date date = new Date();
+                        Long startTime = date.getTime();
                         String[] times = TimeOuter.stampToDate(startTime);
                         HashMap<String, Object> reservationDate = new HashMap<>(100);
                         reservationDate.put("date", TimeOuter.stringToDate(times[0]));
                         reservationDate.put("time", TimeOuter.stringToTime(times[1]));
-                        Object[] params = new Object[]{openId, reservationDate.get("date"), reservationDate.get("time"), 0, tableId, seatId};
+                        Object[] params = new Object[]{openId, reservationDate.get("date"), reservationDate.get("time"), 0,"北书库",tableId, seatId};
                         chairsDao.updateData(insertReservationSql, params);
                         map.put("result", 1);
                     } else {
@@ -184,17 +205,20 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         }
         return map;
     }
-
-    private void setReservationTime(Long time){
-        this.reservationTime = time;
-    }
     @Override
     public HashMap<String, Object> reservationList(HashMap<String, Object> map) {
         String openId = map.get("open_id").toString();
         String sessionKey = map.get("session_key").toString();
         if (judgeLoginStatus(openId, sessionKey)) {
             //获取当前预约记录
-            Object[] data = chairsDao.getReservationList(selectNowReservationListSql, new Object[]{openId},reservationTime);
+            Object obj = chairsDao.selectData(reservationTimeSql, new Object[]{openId});
+            Object[] data;
+            if(obj != null) {
+                Long reservationTime = TimeOuter.stampToDate(obj.toString());
+                data = chairsDao.getReservationList(selectNowReservationListSql, new Object[]{openId}, reservationTime);
+            }else{
+                data = new Object[]{};
+            }
             map.put("appointing", data);
             //获取历史预约记录
             map = chairsDao.getOldReservationList(selectOldReservationListSql, new Object[]{openId},map);
@@ -215,7 +239,44 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
             chairsDao.updateData(updateSeatSql, new Object[]{"green","",tableId,seatId});
             map.put("result",1);
         } else {
+            System.out.println("执行");
             map.put("result", 0);
+        }
+        return map;
+    }
+
+    @Override
+    public HashMap<String, Object> usingList(HashMap<String, Object> map){
+        String openId = map.get("open_id").toString();
+        String sessionKey = map.get("session_key").toString();
+        if (judgeLoginStatus(openId, sessionKey)) {
+            //获取当前使用记录
+            Object obj = chairsDao.selectData(usingNumberSql, new Object[]{openId,1});
+            Object[] data;
+            if(obj != null) {
+                data = chairsDao.getUsingList(nowUsingSql, new Object[]{openId,1});
+            }else{
+                data = new Object[]{};
+            }
+            map.put("using", data);
+            //获取历史使用记录
+            map = chairsDao.getOldUsingList(oldUsingSql, new Object[]{openId},map);
+        } else {
+            map.put("result", 0);
+        }
+        return map;
+    }
+    @Override
+    public HashMap<String,Object> updateLeavingStatus(HashMap<String, Object> map){
+        String openId = map.get("open_id").toString();
+        int tableId = (int) chairsDao.selectData("select TableID from Seat where UserID = ?",new Object[]{openId});
+        int seatId = (int) chairsDao.selectData("select SeatID from Seat where UserID = ?",new Object[]{openId});
+        if(updateStatus(openId)){
+            chairsDao.updateData(usingListSql, new Object[]{openId,"北书库",seatId,tableId});
+            chairsDao.updateData(reservationChairLeavingSql, new Object[]{4,openId,tableId,seatId});
+            map.put("status",1);
+        }else{
+            map.put("status",0);
         }
         return map;
     }
