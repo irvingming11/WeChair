@@ -147,4 +147,65 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
         }
         return null;
     }
+    @Override
+    public Object[] getUsingList(String sql, Object[] params) {
+        Object[] data = new Object[4];
+        ResultSet rs = super.executeQuery(sql, params);
+        try {
+            while (rs.next()) {
+                data[0] = "北书库";
+                data[1] = "正使用";
+                int tableId = rs.getInt("TableID");
+                int seatId = rs.getInt("SeatID");
+                String number = tableId + "桌" + seatId + "座";
+                data[2] = number;
+                data[3] = rs.getObject("AimDay");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+    @Override
+    public HashMap<String, Object> getOldUsingList(String sql,Object[] params,HashMap<String, Object> map){
+        try {
+            int number = 0;
+            super.executeQuery("select Count(*) from Record where UserID = ? group by UserID", params);
+            while (rs.next()) {
+                number = rs.getInt(1);
+            }
+
+            String[] results = new String[]{"room_name", "status", "seat", "date"};
+            String result = "";
+            for (int i = 0; i < results.length; i++) {
+                if (number != 0) {
+                    Object[] data = new Object[number];
+                    int j = 0;
+                    ResultSet rs = super.executeQuery(sql, params);
+                    while (rs.next()) {
+                        switch(i){
+                            case 1:
+                                result = "已使用";
+                                break;
+                            case 2:
+                                String res1 = rs.getObject(i).toString();
+                                String res2 = rs.getObject((i + 1)).toString();
+                                result = res1 + "桌" + res2 + "座";
+                                break;
+                            default:
+                                result = rs.getObject((i + 1)).toString();
+                        }
+                        data[j++] = result;
+                    }
+                    map.put(results[i], data);
+                } else {
+                    map.put(results[i], new Object[]{});
+                }
+            }
+            return map;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

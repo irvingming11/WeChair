@@ -58,4 +58,20 @@ public interface ChairsManagementDao {
      */
     HashMap<String, Object> getOldReservationList(String sql, Object[] params,HashMap<String, Object> map);
 
+    /**
+     * 获取使用记录
+     * @param sql sql
+     * @param params param
+     * @return Object[]
+     */
+    Object[] getUsingList(String sql, Object[] params);
+
+    /**
+     * 获取历史使用
+     * @param sql   sql
+     * @param params    params
+     * @param map map
+     * @return HashMap
+     */
+    HashMap<String, Object> getOldUsingList(String sql,Object[] params,HashMap<String, Object> map);
 }

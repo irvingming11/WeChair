@@ -102,4 +102,21 @@ public class ChairsManagementController {
         map = chairService.updateReservationList(map);
         return map;
     }
+    @RequestMapping(value = "showUsing")
+    public Map<String, Object> showUsing(@RequestParam(value = "open_id") String openId,
+                                         @RequestParam(value = "session_key")String sessionKey){
+        map.put("open_id", openId);
+        map.put("session_key", sessionKey);
+        map = chairService.usingList(map);
+        return map;
+    }
+    @RequestMapping(value = "leaveChair")
+    public Map<String, Object> leaveChair(@RequestParam(value = "open_id") String openId,
+                                          @RequestParam(value = "session_key")String sessionKey){
+        map.put("open_id", openId);
+        map.put("session_key", sessionKey);
+        map = chairService.updateLeavingStatus(map);
+        return map;
+
+    }
 }

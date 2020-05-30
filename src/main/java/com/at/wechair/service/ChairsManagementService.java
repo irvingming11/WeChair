@@ -47,4 +47,18 @@ public interface ChairsManagementService {
      * @return HashMap
      */
     HashMap<String,Object> updateReservationList(HashMap<String, Object> map);
+
+    /**
+     * 使用记录
+     * @param map   map
+     * @return HashMap
+     */
+    HashMap<String, Object> usingList(HashMap<String, Object> map);
+
+    /**
+     * 更新离座状态
+     * @param map map
+     * @return HashMap
+     */
+    HashMap<String,Object> updateLeavingStatus(HashMap<String, Object> map);
 }
