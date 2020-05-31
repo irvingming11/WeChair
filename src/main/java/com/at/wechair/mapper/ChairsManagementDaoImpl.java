@@ -47,17 +47,16 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
         try{
             ResultSet rs = super.executeQuery(sql, params);
             while(rs.next()) {
-                String time = rs.getObject(1).toString();
-                String tableId = rs.getObject(2).toString();
-                String seatId = rs.getObject(3).toString();
-                Time aimTime = TimeOuter.stringToTime(time);
-                Long times = TimeOuter.stampToDate(time);
+                Date day = rs.getDate(1);
+                Time time = rs.getTime(2);
+                String tableId = rs.getObject(3).toString();
+                String seatId = rs.getObject(4).toString();
+                Long times = TimeOuter.getDate(rs.getString(1) + " " + rs.getString(2));
                 Date date = new Date();
                 Long now = date.getTime();
-                Date aimDay = TimeOuter.stringToDate(TimeOuter.stampToDate(now)[0]);
-                if(times + 1000 * 60 * 30 < now) {
+                if(times + 1000 * 60 * 1 < now) {
                     updateData("update Seat set Mark = ?,UserID = ? where TableID = ? and SeatID = ?",new Object[]{"green","",tableId,seatId});
-                    updateData("update Reservation Mark = ? where AimTime = ? and AimDay = ? ",new Object[]{3,aimTime,aimDay});
+                    updateData("update Reservation set Mark = ? where AimTime = ? and AimDay = ? ",new Object[]{3,time,day});
                 }
             }
         }catch (SQLException e) {
@@ -121,7 +120,6 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
             while (rs.next()) {
                 number = rs.getInt(1);
             }
-
             String[] results = new String[]{"room_name", "usedAppointStatus", "usedAppointSeat", "usedAppointDate"};
             String result = "";
             for (int i = 0; i < results.length; i++) {
@@ -188,7 +186,6 @@ public class ChairsManagementDaoImpl extends BaseDao implements ChairsManagement
                 data[2] = number;
                 data[3] = rs.getObject("Day");
             }
-            System.out.println("执行");
         } catch (SQLException e) {
             e.printStackTrace();
         }
