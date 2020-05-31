@@ -229,7 +229,9 @@ public class ChairsManagementServiceImpl implements ChairsManagementService {
         String openId = map.get("open_id").toString();
         String sessionKey = map.get("session_key").toString();
         if (judgeLoginStatus(openId, sessionKey)) {
+            chairsDao.releaseOutTimeChairs(allChairsTimeSql,new Object[]{0});
             //获取当前预约记录
+
             Object obj = chairsDao.selectData(reservationTimeSql, new Object[]{openId});
             Object[] data;
             if (obj != null) {

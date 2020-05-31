@@ -36,6 +36,17 @@ public class TimeOuter {
         return null;
     }
 
+    public static Long getDate(String date)  {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date result = simpleDateFormat.parse(date);
+            return result.getTime();
+        }catch(ParseException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * 将字符串转换成Date类型
      *
